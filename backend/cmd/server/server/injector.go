@@ -1,8 +1,8 @@
 package server
 
 import (
-	"backend/internal/handler"
-	"backend/internal/repository"
+	"github.com/traP-jp/1m25_10/backend/internal/handler"
+	"github.com/traP-jp/1m25_10/backend/internal/repository"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"

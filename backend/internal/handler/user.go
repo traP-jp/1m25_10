@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"backend/internal/repository"
+	"github.com/traP-jp/1m25_10/backend/internal/repository"
 	"fmt"
 	"net/http"
 
