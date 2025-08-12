@@ -54,6 +54,7 @@ fix: ログイン時に発生する軽微なバグを修正
 | `docs:`     | ドキュメントの修正         | `docs: update README.md`                 |
 | `chore:`    | ビルドや設定ファイルの変更 | `chore: ライブラリのバージョンアップ`    |
 | `assets:`   | アセットの追加・変更       | `assets: 新しいロゴ画像を追加`           |
+| `ci:`       | CI/CD 設定の変更           | `ci: GitHub Actions の設定を追加`        |
 
 ## ブランチ
 
