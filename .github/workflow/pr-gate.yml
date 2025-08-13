@@ -1,0 +1,78 @@
+name: PR Gate
+
+on:
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.filter.outputs.frontend }}
+      backend: ${{ steps.filter.outputs.backend }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Filter changed paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            frontend:
+              - "frontend/**"
+              - ".github/workflows/reusable-frontend-ci.yml"
+            backend:
+              - "backend/**"
+              - ".github/workflows/reusable-backend-ci.yml"
+
+  # フロントエンドCIを呼び出すジョブ
+  frontend-ci:
+    name: Frontend CI
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
+    uses: ./.github/workflows/reusable-frontend-ci.yml
+    # secrets を渡す場合はここに記述
+    # secrets: inherit
+
+  # バックエンドCIを呼び出すジョブ
+  backend-ci:
+    name: Backend CI
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    uses: ./.github/workflows/reusable-backend-ci.yml
+
+  # 必須チェックとして登録するためのジョブ
+  required-checks:
+    name: Required Checks
+    needs: [frontend-ci, backend-ci]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Verify CI results
+        run: |
+          # needs コンテキストから各ジョブの結果を取得
+          # result は success, failure, cancelled, skipped のいずれか
+          frontend_result="${{ needs.frontend-ci.result }}"
+          backend_result="${{ needs.backend-ci.result }}"
+
+          echo "Frontend CI result: $frontend_result"
+          echo "Backend CI result: $backend_result"
+
+          # 失敗したジョブがないかチェック
+          # 'skipped' は変更がなかったということなので成功とみなす
+          if [[ "$frontend_result" == "failure" || "$frontend_result" == "cancelled" ]]; then
+            echo "❌ Frontend CI has failed."
+            exit 1
+          fi
+          if [[ "$backend_result" == "failure" || "$backend_result" == "cancelled" ]]; then
+            echo "❌ Backend CI has failed."
+            exit 1
+          fi
+
+          echo "✅ All required checks passed or were skipped."
+          exit 0
