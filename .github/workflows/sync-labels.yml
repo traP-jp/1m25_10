@@ -1,0 +1,24 @@
+# Sync GitHub labels from .github/labels.yml on push to main or manual trigger
+name: Sync Labels
+permissions:
+  issues: write
+  contents: read
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/labels.yml
+  workflow_dispatch:
+jobs:
+  label-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Sync repository labels
+        uses: crazy-max/ghaction-github-labeler@v5
+        with:
+          yaml-file: .github/labels.yml
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          skip-delete: true
