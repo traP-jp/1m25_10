@@ -1,7 +1,7 @@
-# Type: issueがどのような種類のタスクであるか
+# Type: どのような種類であるか
 - name: "type: epic"
   color: "1D76DB"
-  description: "複数のタスクを束ねる親issue"
+  description: "複数のタスクを束ねる親"
 - name: "type: enhancement"
   color: "007bff"
   description: "新機能の追加や既存機能の改善"
@@ -12,38 +12,38 @@
   color: "6f42c1"
   description: "コード品質を向上させる内部改善"
 
-# Area: issueがどの領域に関連するか
+# Area: どの領域に関連するか
 - name: "area: frontend"
   color: "28a745"
-  description: "フロントエンドに関するタスク"
+  description: "フロントエンドに関連"
 - name: "area: backend"
   color: "24292e"
-  description: "バックエンドに関するタスク"
+  description: "バックエンドに関連"
 - name: "area: design"
   color: "db61a2"
-  description: "UI/UXデザインに関するタスク"
+  description: "UI/UXデザインに関連"
 - name: "area: docs"
   color: "cfd8dc"
-  description: "ドキュメントの作成や更新"
+  description: "ドキュメントの作成や更新に関連"
 - name: "area: infra"
   color: "8B4513"
-  description: "開発・本番環境のインフラ関連タスク"
+  description: "開発や本番環境のインフラに関連"
 
-# Priority: issueの優先度
+# Priority: 優先度
 - name: "priority: critical"
   color: "b60205"
-  description: "最優先で対応すべき致命的な問題"
+  description: "最優先で対応すべき"
 - name: "priority: must"
   color: "fbca04"
-  description: "リリースに必須な機能や修正"
+  description: "リリースに必須"
 - name: "priority: should"
   color: "fef2c0"
   description: "対応が推奨される改善"
 - name: "priority: could"
   color: "f7f7f7"
-  description: "必須ではないが望ましい改善"
+  description: "必須ではない改善"
 
-# Need: issueを進める上で必要なアクション
+# Need: 必要なアクションや状態
 - name: "need: attention"
   color: "ffc107"
   description: "慎重な作業やレビューが必要"
