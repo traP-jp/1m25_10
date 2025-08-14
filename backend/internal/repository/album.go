@@ -2,10 +2,10 @@ package repository
 
 import (
 	"context"
-	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jmoiron/sqlx"
 )
 
 type AlbumRepository interface {
@@ -26,6 +26,12 @@ type (
 		Images      []uuid.UUID
 		CreatedAt   time.Time
 		UpdatedAt   time.Time
+	}
+
+	AlbumItem struct {
+		Id      uuid.UUID
+		Title   string
+		Creator uuid.UUID
 	}
 
 	AlbumFilter struct {
@@ -49,21 +55,49 @@ type (
 )
 
 type sqlAlbumRepository struct {
-	db *sql.DB
+	db *sqlx.DB
 }
 
-func NewAlbumRepository(db *sql.DB) AlbumRepository {
+func NewAlbumRepository(db *sqlx.DB) AlbumRepository {
 	return &sqlAlbumRepository{db: db}
 }
 
-//TODO: Implement the actual SQL logic for retrieving albums based on filter
+type dbAlbum struct {
+	Id          uuid.UUID   `db:"id"`
+	Title       string      `db:"title"`
+	Description string      `db:"description"`
+	Creator     uuid.UUID   `db:"creator"`
+	Images      []uuid.UUID `db:"images"`
+	CreatedAt   time.Time   `db:"created_at"`
+	UpdatedAt   time.Time   `db:"updated_at"`
+}
+
+// TODO: Implement the actual SQL logic for retrieving albums based on filter
 func (r *sqlAlbumRepository) GetAlbums(ctx context.Context, filter AlbumFilter) ([]uuid.UUID, error) {
 	return nil, nil
 }
 
-// TODO: Implement the actual SQL logic for inserting a new album
+// PostAlbum creates a new album and returns its ID
 func (r *sqlAlbumRepository) PostAlbum(ctx context.Context, params PostAlbumParams) (uuid.UUID, error) {
-	return uuid.Nil, nil
+	query := `
+		INSERT INTO albums (id, title, description, creator, created_at, updated_at)
+		VALUES (:id, :title, :description, :creator, :created_at, :updated_at)
+	`
+	now := time.Now()
+	albumToInsert := dbAlbum{
+		Id:          uuid.New(),
+		Title:       params.Title,
+		Description: params.Description,
+		Creator:     params.Creator,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+	}
+	_, err := r.db.NamedExecContext(ctx, query, albumToInsert)
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	return albumToInsert.Id, nil
 }
 
 // TODO: Implement the actual SQL logic for retrieving an album by ID
@@ -76,7 +110,7 @@ func (r *sqlAlbumRepository) DeleteAlbum(ctx context.Context, albumID uuid.UUID)
 	return nil
 }
 
-//TODO: Implement the actual SQL logic for updating an album
+// TODO: Implement the actual SQL logic for updating an album
 func (r *sqlAlbumRepository) UpdateAlbum(ctx context.Context, albumID uuid.UUID, params UpdateAlbumParams) error {
 	return nil
 }
