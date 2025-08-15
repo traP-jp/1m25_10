@@ -2,6 +2,9 @@ package repository
 
 import (
 	"context"
+	"database/sql/driver"
+	"encoding/json"
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -10,7 +13,7 @@ import (
 
 type AlbumRepository interface {
 	GetAlbums(ctx context.Context, filter AlbumFilter) ([]uuid.UUID, error)
-	PostAlbum(ctx context.Context, params PostAlbumParams) (uuid.UUID, error)
+	PostAlbum(ctx context.Context, params PostAlbumParams) (*Album, error)
 	GetAlbum(ctx context.Context, albumID uuid.UUID) (*Album, error)
 	DeleteAlbum(ctx context.Context, albumID uuid.UUID) error
 	UpdateAlbum(ctx context.Context, albumID uuid.UUID, params UpdateAlbumParams) error
@@ -62,14 +65,38 @@ func NewAlbumRepository(db *sqlx.DB) AlbumRepository {
 	return &sqlAlbumRepository{db: db}
 }
 
+// uuidの配列をdbに保存するための型(json形式で保存)
+type dbUUIDs []uuid.UUID
+
+// dbUUIDsをjsonに変換
+func (u dbUUIDs) Value() (driver.Value, error) {
+	if u == nil {
+		return nil, nil
+	}
+	return json.Marshal(u)
+}
+
+// jsonからdbUUIDsを復元
+func (u *dbUUIDs) Scan(value interface{}) error {
+	if value == nil {
+		*u = nil
+		return nil
+	}
+	b, ok := value.([]byte)
+	if !ok {
+		return errors.New("type assertion to []byte failed")
+	}
+	return json.Unmarshal(b, u)
+}
+
 type dbAlbum struct {
-	Id          uuid.UUID   `db:"id"`
-	Title       string      `db:"title"`
-	Description string      `db:"description"`
-	Creator     uuid.UUID   `db:"creator"`
-	Images      []uuid.UUID `db:"images"`
-	CreatedAt   time.Time   `db:"created_at"`
-	UpdatedAt   time.Time   `db:"updated_at"`
+	Id          uuid.UUID `db:"id"`
+	Title       string    `db:"title"`
+	Description string    `db:"description"`
+	Creator     uuid.UUID `db:"creator"`
+	Images      dbUUIDs   `db:"images"`
+	CreatedAt   time.Time `db:"created_at"`
+	UpdatedAt   time.Time `db:"updated_at"`
 }
 
 // TODO: Implement the actual SQL logic for retrieving albums based on filter
@@ -78,26 +105,35 @@ func (r *sqlAlbumRepository) GetAlbums(ctx context.Context, filter AlbumFilter) 
 }
 
 // PostAlbum creates a new album and returns its ID
-func (r *sqlAlbumRepository) PostAlbum(ctx context.Context, params PostAlbumParams) (uuid.UUID, error) {
+func (r *sqlAlbumRepository) PostAlbum(ctx context.Context, params PostAlbumParams) (*Album, error) {
 	query := `
-		INSERT INTO albums (id, title, description, creator, created_at, updated_at)
-		VALUES (:id, :title, :description, :creator, :created_at, :updated_at)
+		INSERT INTO albums (id, title, description, creator, images, created_at, updated_at)
+		VALUES (:id, :title, :description, :creator, :images, :created_at, :updated_at)
 	`
 	now := time.Now()
-	albumToInsert := dbAlbum{
+	newAlbum := dbAlbum{
 		Id:          uuid.New(),
 		Title:       params.Title,
 		Description: params.Description,
 		Creator:     params.Creator,
+		Images:      params.Images,
 		CreatedAt:   now,
 		UpdatedAt:   now,
 	}
-	_, err := r.db.NamedExecContext(ctx, query, albumToInsert)
+	_, err := r.db.NamedExecContext(ctx, query, newAlbum)
 	if err != nil {
-		return uuid.Nil, err
+		return nil, err
 	}
 
-	return albumToInsert.Id, nil
+	return &Album{
+		Id:          newAlbum.Id,
+		Title:       newAlbum.Title,
+		Description: newAlbum.Description,
+		Creator:     newAlbum.Creator,
+		Images:      newAlbum.Images,
+		CreatedAt:   newAlbum.CreatedAt,
+		UpdatedAt:   newAlbum.UpdatedAt,
+	}, nil
 }
 
 // TODO: Implement the actual SQL logic for retrieving an album by ID
