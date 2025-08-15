@@ -2,9 +2,11 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -116,7 +118,7 @@ func (r *sqlAlbumRepository) PostAlbum(ctx context.Context, params PostAlbumPara
 		Title:       params.Title,
 		Description: params.Description,
 		Creator:     params.Creator,
-		Images:      params.Images,
+		Images:      dbUUIDs(params.Images),
 		CreatedAt:   now,
 		UpdatedAt:   now,
 	}
@@ -130,15 +132,40 @@ func (r *sqlAlbumRepository) PostAlbum(ctx context.Context, params PostAlbumPara
 		Title:       newAlbum.Title,
 		Description: newAlbum.Description,
 		Creator:     newAlbum.Creator,
-		Images:      newAlbum.Images,
+		Images:      []uuid.UUID(newAlbum.Images),
 		CreatedAt:   newAlbum.CreatedAt,
 		UpdatedAt:   newAlbum.UpdatedAt,
 	}, nil
 }
 
+var ErrNotFound = errors.New("not found")
+
 // TODO: Implement the actual SQL logic for retrieving an album by ID
 func (r *sqlAlbumRepository) GetAlbum(ctx context.Context, albumID uuid.UUID) (*Album, error) {
-	return nil, nil
+	var dbAlbumModel dbAlbum
+	query := `
+		SELECT id, title, description, creator, images, created_at, updated_at
+		FROM albums
+		Where id = ?
+		`
+	query = r.db.Rebind(query)
+	err := r.db.GetContext(ctx, &dbAlbumModel, query, albumID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrNotFound
+		}
+		return nil, fmt.Errorf("failed to get album (id=%s) : %w", albumID, err)
+
+	}
+	return &Album{
+		Id:          dbAlbumModel.Id,
+		Title:       dbAlbumModel.Title,
+		Description: dbAlbumModel.Description,
+		Creator:     dbAlbumModel.Creator,
+		Images:      dbAlbumModel.Images,
+		CreatedAt:   dbAlbumModel.CreatedAt,
+		UpdatedAt:   dbAlbumModel.UpdatedAt,
+	}, nil
 }
 
 // TODO: Implement the actual SQL logic for deleting an album by ID
