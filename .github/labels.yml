@@ -28,6 +28,9 @@
 - name: "area: infra"
   color: "8B4513"
   description: "開発や本番環境のインフラに関連"
+- name: "area: security"
+  color: "b60205"
+  description: "セキュリティに関連する問題"
 
 # Priority: 優先度
 - name: "priority: critical"
