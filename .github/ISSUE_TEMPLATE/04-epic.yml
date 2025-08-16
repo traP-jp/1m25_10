@@ -1,0 +1,75 @@
+name: "Epic"
+description: "複数の関連するIssueをまとめるもの"
+title: "[Epic] "
+labels: ["type: epic", "need: triage"]
+
+body:
+  - type: textarea
+    id: overview
+    attributes:
+      label: "Overview"
+      description: "目的や期待する成果をまとめた、簡潔な概要"
+      placeholder: |
+        ex. ユーザーが新しいダッシュボード機能を使えるようにする
+    validations:
+      required: true
+
+  # - type: textarea
+  #   id: reason
+  #   attributes:
+  #     label: "Reason"
+  #     description: "なぜ、このEpicが必要なのか"
+  #     placeholder: |
+  #       ex. 既存のダッシュボードでは、ユーザーが必要な情報を一覧できず、UXを損なっているため。
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: "Acceptance Criteria"
+      description: "何をもってこのEpicが完了したと判断するか"
+      placeholder: |
+        - [ ] 新しいダッシュボード機能が、全てのテストを通過して本番環境にデプロイされている
+        - [ ] ユーザーマニュアルが更新されている
+
+  # - type: textarea
+  #   id: in-scope
+  #   attributes:
+  #     label: "In Scope"
+  #     description: "このEpicで実施する作業"
+  #     placeholder: |
+  #       - ダッシュボードのUIデザイン実装
+  #       - データ表示のためのAPI開発
+
+  # - type: textarea
+  #   id: out-of-scope
+  #   attributes:
+  #     label: "Out of Scope"
+  #     description: "このEpicでは実施しない作業\n関係者間の認識のズレを防ぐため"
+  #     placeholder: |
+  #       - ユーザー認証機能の改修
+  #       - PDFエクスポート機能
+
+  - type: textarea
+    id: related-issues
+    attributes:
+      label: "Related Issues"
+      description: "このEpicを達成するために必要なIssueやタスクをリストアップ"
+      placeholder: |
+        #### フロントエンド
+
+        - #123 ダッシュボードのUI実装
+        - #124 API連携と表示ロジック実装
+
+        #### バックエンド
+
+        - #125 APIの設計
+        - #126 データベースのマイグレーション
+
+  - type: textarea
+    id: references
+    attributes:
+      label: "References"
+      description: "参考情報や、関連情報等あれば"
+      placeholder: |
+        - [Figmaデザイン](http://example.com)
+        - [要件定義書](http://example.com)

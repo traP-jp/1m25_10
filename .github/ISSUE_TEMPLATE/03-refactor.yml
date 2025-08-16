@@ -1,0 +1,47 @@
+name: "Refactoring"
+description: "ユーザーから見える動作は変えずに、コードの品質を向上させるための提案"
+title: "[Refactor] "
+labels: ["type: refactoring", "need: triage"]
+body:
+  - type: textarea
+    id: overview
+    attributes:
+      label: "Overview"
+      description: "どの部分のコードをどのように改善したいか、簡潔な概要"
+      placeholder: |
+        ex. コンポーネントxの責務を分割して見通しを良くする
+    validations:
+      required: true
+
+  - type: textarea
+    id: reason
+    attributes:
+      label: "Reason"
+      description: "なぜ、改善したいのか"
+      placeholder: |
+        ex. コンポーネントの責務が混在しており、保守性が低いため
+
+  - type: textarea
+    id: suggested-fix
+    attributes:
+      label: "Suggested Fix"
+      description: "この不具合に対する推奨する解決策"
+      placeholder: |
+        ex. ログインボタンのクリックイベントにエラーがあるので正しく設定する
+
+  - type: textarea
+    id: dev-tasks
+    attributes:
+      label: "Tasks"
+      description: "必要ならタスクを分割"
+      placeholder: |
+        - [ ] タスク1
+        - [ ] タスク2
+
+  - type: textarea
+    id: references
+    attributes:
+      label: "References"
+      description: "参考情報や、関連情報等あれば"
+      placeholder: |
+        - #123

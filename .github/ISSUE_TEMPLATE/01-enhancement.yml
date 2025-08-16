@@ -1,0 +1,42 @@
+name: "Enhancement"
+description: "新しい機能や既存機能の改善を提案"
+title: "[Enhancement] "
+labels: ["type: enhancement", "need: triage"]
+
+body:
+  - type: textarea
+    id: overview
+    attributes:
+      label: "Overview"
+      description: "どのような機能改善をしたいか、簡潔な概要"
+      placeholder: |
+        ex. ユーザーがCSVでデータをエクスポートできる機能の実装
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: "Acceptance Criteria"
+      description: "完了の基準"
+      placeholder: |
+        - [ ] 画面にCSVダウンロードボタンが表示される
+        - [ ] ダウンロードしたCSVにA, B, Cの列が含まれている
+
+  - type: textarea
+    id: dev-tasks
+    attributes:
+      label: "Tasks"
+      description: "必要ならタスクを分割"
+      placeholder: |
+        - [ ] タスク1
+        - [ ] タスク2
+
+  - type: textarea
+    id: references
+    attributes:
+      label: "References"
+      description: "参考情報や、関連情報等あれば"
+      placeholder: |
+        - #123
+        - https://www.figma.com/design/...
