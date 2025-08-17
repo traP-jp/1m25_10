@@ -15,7 +15,7 @@ import (
 )
 
 type AlbumRepository interface {
-	GetAlbums(ctx context.Context, filter AlbumFilter) ([]uuid.UUID, error)
+	GetAlbums(ctx context.Context, filter AlbumFilter) ([]Album, error)
 	PostAlbum(ctx context.Context, params PostAlbumParams) (*Album, error)
 	GetAlbum(ctx context.Context, albumID uuid.UUID) (*Album, error)
 	DeleteAlbum(ctx context.Context, albumID uuid.UUID) error
@@ -41,9 +41,12 @@ type (
 	}
 
 	AlbumFilter struct {
-		CreatorID  *uuid.UUID
-		IsFavorite *bool
-		// other conditions can be added as needed
+		CreatorID *uuid.UUID
+		BeforeDate *time.Time // Filter by created_at
+		AfterDate  *time.Time  // Filter by created_at
+		Limit      *int
+		Offset     *int
+		//あとはIsFavorite(*bool)とか？
 	}
 
 	PostAlbumParams struct {
@@ -102,9 +105,65 @@ type dbAlbum struct {
 	UpdatedAt   time.Time `db:"updated_at"`
 }
 
-// TODO: Implement the actual SQL logic for retrieving albums based on filter
-func (r *sqlAlbumRepository) GetAlbums(ctx context.Context, filter AlbumFilter) ([]uuid.UUID, error) {
-	return nil, nil
+// GetAlbums retrieves albums based on the provided filter.
+func (r *sqlAlbumRepository) GetAlbums(ctx context.Context, filter AlbumFilter) ([]Album, error) {
+	query := `SELECT id, title, description, creator, images, created_at, updated_at FROM albums WHERE 1=1`
+	args := []interface{}{}
+
+	if filter.CreatorID != nil {
+		query += " AND creator = ?"
+		args = append(args, *filter.CreatorID)
+	}
+	if filter.AfterDate != nil {
+		query += " AND created_at >= ?"
+		args = append(args, *filter.AfterDate)
+	}
+	if filter.BeforeDate != nil {
+		query += " AND created_at <= ?"
+		args = append(args, *filter.BeforeDate)
+	}
+
+	// created_atに基づき並べ替え
+	query += " ORDER BY created_at DESC"
+
+	const maxLimit = 100
+	lim := 20 // Default limit
+	if filter.Limit != nil {
+		if *filter.Limit > 0 && *filter.Limit < maxLimit {
+			lim = *filter.Limit
+		} else {
+			lim = maxLimit
+		}
+	}
+	query += " LIMIT ?"
+	args = append(args, lim)
+
+	if filter.Offset != nil {
+		query += " OFFSET ?"
+		args = append(args, *filter.Offset)
+	}
+
+	query = r.db.Rebind(query)
+
+	var dbAlbums []dbAlbum
+	if err := r.db.SelectContext(ctx, &dbAlbums, query, args...); err != nil {
+		return nil, fmt.Errorf("failed to select albums: %w", err)
+	}
+
+	albums := make([]Album, len(dbAlbums))
+	for i, a := range dbAlbums {
+		albums[i] = Album{
+			Id:          a.Id,
+			Title:       a.Title,
+			Description: a.Description,
+			Creator:     a.Creator,
+			Images:      []uuid.UUID(a.Images),
+			CreatedAt:   a.CreatedAt,
+			UpdatedAt:   a.UpdatedAt,
+		}
+	}
+
+	return albums, nil
 }
 
 // PostAlbum creates a new album and returns its ID
@@ -141,13 +200,13 @@ func (r *sqlAlbumRepository) PostAlbum(ctx context.Context, params PostAlbumPara
 
 var ErrNotFound = errors.New("not found")
 
-// TODO: Implement the actual SQL logic for retrieving an album by ID
+// GetAlbum retrieves an album by its ID
 func (r *sqlAlbumRepository) GetAlbum(ctx context.Context, albumID uuid.UUID) (*Album, error) {
 	var dbAlbumModel dbAlbum
 	query := `
 		SELECT id, title, description, creator, images, created_at, updated_at
 		FROM albums
-		Where id = ?
+		WHERE id = ?
 		`
 	query = r.db.Rebind(query)
 	err := r.db.GetContext(ctx, &dbAlbumModel, query, albumID)
