@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -194,7 +195,52 @@ func (r *sqlAlbumRepository) DeleteAlbum(ctx context.Context, albumID uuid.UUID)
 	return nil
 }
 
-// TODO: Implement the actual SQL logic for updating an album
+var ErrNoFieldsToUpdate = errors.New("no fields to update")
+
+// UpdateAlbum updates an album with the given parameters
 func (r *sqlAlbumRepository) UpdateAlbum(ctx context.Context, albumID uuid.UUID, params UpdateAlbumParams) error {
+	if albumID == uuid.Nil {
+		return fmt.Errorf("invalid album id")
+	}
+
+	sets := []string{}
+	args := []interface{}{}
+
+	if params.Title != nil {
+		sets = append(sets, "title = ?")
+		args = append(args, *params.Title)
+	}
+	if params.Description != nil {
+		sets = append(sets, "description = ?")
+		args = append(args, *params.Description)
+	}
+	if params.Images != nil {
+		sets = append(sets, "images = ?")
+		args = append(args, dbUUIDs(*params.Images))
+	}
+
+	if len(sets) == 0 {
+		return ErrNoFieldsToUpdate
+	}
+
+	sets = append(sets, "updated_at = ?")
+	args = append(args, time.Now())
+
+	args = append(args, albumID)
+
+	query := "UPDATE albums SET " + strings.Join(sets, ", ") + " WHERE id = ?"
+	query = r.db.Rebind(query)
+
+	result, err := r.db.ExecContext(ctx, query, args...)
+	if err != nil {
+		return fmt.Errorf("failed to update album (id=%s): %w", albumID, err)
+	}
+	ra, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("rows affected error (id=%s): %w", albumID, err)
+	}
+	if ra == 0 {
+		return ErrNotFound
+	}
 	return nil
 }
