@@ -1,0 +1,10 @@
+{
+  "name": "1m25_10",
+  "private": true,
+  "workspaces": [
+    "frontend"
+  ],
+  "scripts": {
+    "front:dev": "npm --workspace=frontend run dev"
+  }
+}
