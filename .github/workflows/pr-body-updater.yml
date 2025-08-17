@@ -25,8 +25,8 @@ jobs:
             echo "Issue number extracted: $ISSUE_NUMBER"
             echo "issue_number=$ISSUE_NUMBER" >> $GITHUB_OUTPUT
           else
-            echo "Branch name '${BRANCH_NAME}' does not follow the expected format '<prefix>/<number>-<description>'."
-            exit 1
+            echo "Branch name '${BRANCH_NAME}' does not follow the expected format '<prefix>/<number>-<description>'. Skipping issue extraction."
+            echo "issue_number=" >> $GITHUB_OUTPUT
           fi
 
       - name: Update PR Description
