@@ -168,8 +168,29 @@ func (r *sqlAlbumRepository) GetAlbum(ctx context.Context, albumID uuid.UUID) (*
 	}, nil
 }
 
-// TODO: Implement the actual SQL logic for deleting an album by ID
+// DeleteAlbum deletes an album by its ID
 func (r *sqlAlbumRepository) DeleteAlbum(ctx context.Context, albumID uuid.UUID) error {
+	if albumID == uuid.Nil {
+		return fmt.Errorf("invalid album id")
+	}
+
+	query := `
+		DELETE FROM albums
+		WHERE id = ?
+	`
+	query = r.db.Rebind(query)
+	result, err := r.db.ExecContext(ctx, query, albumID)
+	if err != nil {
+		return fmt.Errorf("failed to delete album (id=%s) : %w", albumID, err)
+	}
+
+	ra, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected (id=%s) : %w", albumID, err)
+	}
+	if ra == 0 {
+		return ErrNotFound
+	}
 	return nil
 }
 
