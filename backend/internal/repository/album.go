@@ -15,7 +15,7 @@ import (
 )
 
 type AlbumRepository interface {
-	GetAlbums(ctx context.Context, filter AlbumFilter) ([]Album, error)
+	GetAlbums(ctx context.Context, filter AlbumFilter) ([]AlbumItem, error)
 	PostAlbum(ctx context.Context, params PostAlbumParams) (*Album, error)
 	GetAlbum(ctx context.Context, albumID uuid.UUID) (*Album, error)
 	DeleteAlbum(ctx context.Context, albumID uuid.UUID) error
@@ -41,9 +41,9 @@ type (
 	}
 
 	AlbumFilter struct {
-		CreatorID *uuid.UUID
+		CreatorID  *uuid.UUID
 		BeforeDate *time.Time // Filter by created_at
-		AfterDate  *time.Time  // Filter by created_at
+		AfterDate  *time.Time // Filter by created_at
 		Limit      *int
 		Offset     *int
 		//あとはIsFavorite(*bool)とか？
@@ -105,9 +105,15 @@ type dbAlbum struct {
 	UpdatedAt   time.Time `db:"updated_at"`
 }
 
+type dbAlbumItem struct {
+		Id      uuid.UUID `db:"id"`
+		Title   string    `db:"title"`
+		Creator uuid.UUID `db:"creator"`
+	}
+
 // GetAlbums retrieves albums based on the provided filter.
-func (r *sqlAlbumRepository) GetAlbums(ctx context.Context, filter AlbumFilter) ([]Album, error) {
-	query := `SELECT id, title, description, creator, images, created_at, updated_at FROM albums WHERE 1=1`
+func (r *sqlAlbumRepository) GetAlbums(ctx context.Context, filter AlbumFilter) ([]AlbumItem, error) {
+	query := `SELECT id, title, creator FROM albums WHERE 1=1`
 	args := []interface{}{}
 
 	if filter.CreatorID != nil {
@@ -145,25 +151,17 @@ func (r *sqlAlbumRepository) GetAlbums(ctx context.Context, filter AlbumFilter) 
 
 	query = r.db.Rebind(query)
 
-	var dbAlbums []dbAlbum
-	if err := r.db.SelectContext(ctx, &dbAlbums, query, args...); err != nil {
-		return nil, fmt.Errorf("failed to select albums: %w", err)
+	var dbItems []dbAlbumItem
+	if err := r.db.SelectContext(ctx, &dbItems, query, args...); err != nil {
+		return nil, fmt.Errorf("failed to select album items: %w", err)
 	}
 
-	albums := make([]Album, len(dbAlbums))
-	for i, a := range dbAlbums {
-		albums[i] = Album{
-			Id:          a.Id,
-			Title:       a.Title,
-			Description: a.Description,
-			Creator:     a.Creator,
-			Images:      []uuid.UUID(a.Images),
-			CreatedAt:   a.CreatedAt,
-			UpdatedAt:   a.UpdatedAt,
-		}
+	items := make([]AlbumItem, len(dbItems))
+	for i, d := range dbItems {
+		items[i] = AlbumItem(d)
 	}
 
-	return albums, nil
+	return items, nil
 }
 
 // PostAlbum creates a new album and returns its ID
