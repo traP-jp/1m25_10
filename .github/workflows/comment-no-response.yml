@@ -1,0 +1,121 @@
+name: Comment out `_No response_` sections on issues
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+
+jobs:
+  comment-no-response:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Comment out `_No response_` sections
+        uses: actions/github-script@v6
+        env:
+          MIN_HEADING_LEVEL: '3'
+          TARGET_HEADING_PATTERN: '^(Implementation Plan|Acceptance Criteria|Expected Behavior|Actual Behavior|Tasks|References|Reason|Suggested Fix)$'
+        with:
+          script: |
+            const issue = context.payload.issue;
+            if (!issue) {
+              core.info('No issue payload found.');
+              return;
+            }
+            const originalBody = issue.body || '';
+
+            const MIN_HEADING_LEVEL = Number(process.env.MIN_HEADING_LEVEL) || 3;
+            const TARGET_HEADING_PATTERN_RAW = process.env.TARGET_HEADING_PATTERN || '';
+
+            function compileTargetRegex(raw) {
+              if (!raw || !raw.trim()) return null;
+              try {
+                return new RegExp(raw, 'i');
+              } catch (e) {
+                core.error(`Invalid TARGET_HEADING_PATTERN ignored: ${raw}`);
+                return null;
+              }
+            }
+
+            const TARGET_HEADING_RE = compileTargetRegex(TARGET_HEADING_PATTERN_RAW);
+
+            // Escape a literal HTML comment end sequence so the generated comment can't be closed early
+            function escapeHtmlCommentEnd(s) {
+              return s.replace(/-->/g, '--&gt;');
+            }
+
+            // Collect a heading block starting at index i and return {blockLines, nextIndex}
+            function collectBlock(lines, i) {
+              const block = [lines[i]];
+              let j = i + 1;
+              while (j < lines.length && !lines[j].match(/^(#{1,6})\s.*$/)) {
+                block.push(lines[j]);
+                j++;
+              }
+              return { blockLines: block, nextIndex: j };
+            }
+
+            function transform(body) {
+              const lines = body.split(/\r?\n/);
+              const outLines = [];
+              let i = 0;
+              while (i < lines.length) {
+                const line = lines[i];
+                const heading = line.match(/^(#{1,6})\s(.*)$/);
+                if (!heading) {
+                  outLines.push(line);
+                  i++;
+                  continue;
+                }
+
+                const level = heading[1].length;
+                const headingText = heading[2].trim();
+                const { blockLines, nextIndex } = collectBlock(lines, i);
+                const contentLines = blockLines.slice(1);
+                const contentTrim = contentLines.join('\n').trim();
+
+                const targetMatch = !TARGET_HEADING_RE || TARGET_HEADING_RE.test(headingText);
+
+                if (level >= MIN_HEADING_LEVEL && targetMatch && contentTrim === '_No response_') {
+                  // join block, escape any '-->' and wrap in an HTML comment
+                  const joined = blockLines.join('\n');
+                  outLines.push('<!--');
+                  outLines.push(escapeHtmlCommentEnd(joined));
+                  outLines.push('-->');
+                  // add a blank line after the commented block for readability
+                  outLines.push('');
+                } else {
+                  // preserve original block lines
+                  for (const l of blockLines) outLines.push(l);
+                }
+
+                i = nextIndex;
+              }
+
+              // Reconstruct body with original newline style; default to '\n'.
+              const reconstructed = outLines.join('\n');
+              // If original didn't end with newline, remove one added at the end
+              if (!body.endsWith('\n') && reconstructed.endsWith('\n')) return reconstructed.slice(0, -1);
+              return reconstructed;
+            }
+
+            (async () => {
+              try {
+                const newBody = transform(originalBody);
+                if (newBody !== originalBody) {
+                  core.info('Updating issue body to comment out `_No response_` sections.');
+                  await github.rest.issues.update({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: issue.number,
+                    body: newBody,
+                  });
+                } else {
+                  core.info('No changes required.');
+                }
+              } catch (err) {
+                core.error(`Failed to transform issue body: ${err && err.stack ? err.stack : String(err)}`);
+              }
+            })();

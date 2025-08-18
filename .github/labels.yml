@@ -28,6 +28,9 @@
 - name: "area: infra"
   color: "8B4513"
   description: "開発や本番環境のインフラに関連"
+- name: "area: security"
+  color: "b60205"
+  description: "セキュリティに関連する問題"
 
 # Priority: 優先度
 - name: "priority: critical"
@@ -47,6 +50,9 @@
 - name: "need: attention"
   color: "ffc107"
   description: "慎重な作業やレビューが必要"
+- name: "need: triage"
+  color: "FF9800"
+  description: "状況整理や優先度の判定が必要"
 - name: "need: discussion"
   color: "84DEFF"
   description: "仕様や方針の議論が必要"
