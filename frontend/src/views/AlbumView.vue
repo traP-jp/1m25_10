@@ -1,5 +1,5 @@
 <template>
   <div>
-    HomeView
+    AlbumView
   </div>
 </template>
