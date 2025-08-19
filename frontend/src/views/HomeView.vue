@@ -1,5 +1,3 @@
 <template>
-  <div>
-    HomeView
-  </div>
+  <div>HomeView</div>
 </template>

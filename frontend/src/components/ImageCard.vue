@@ -1,5 +1,3 @@
 <template>
-  <div>
-    ImageCard
-  </div>
+  <div>ImageCard</div>
 </template>

@@ -1,5 +1,3 @@
 <template>
-  <div>
-    AlbumListView
-  </div>
+  <div>AlbumListView</div>
 </template>

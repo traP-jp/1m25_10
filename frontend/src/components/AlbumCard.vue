@@ -1,5 +1,3 @@
 <template>
-  <div>
-    AlbumCard
-  </div>
+  <div>AlbumCard</div>
 </template>
