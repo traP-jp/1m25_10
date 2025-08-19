@@ -1,0 +1,56 @@
+name: PR body updater
+
+on:
+  pull_request:
+    types: [opened, ready_for_review]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  add-issue-reference:
+    if: github.event.pull_request.draft == false
+    timeout-minutes: 3
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract issue number from branch name
+        id: extract_issue
+        run: |
+          BRANCH_NAME="${{ github.head_ref }}"
+          if [[ $BRANCH_NAME =~ ^[a-zA-Z0-9]+/([0-9]+)- ]]; then
+            ISSUE_NUMBER=${BASH_REMATCH[1]}
+            echo "Issue number extracted: $ISSUE_NUMBER"
+            echo "issue_number=$ISSUE_NUMBER" >> $GITHUB_OUTPUT
+          else
+            echo "Branch name '${BRANCH_NAME}' does not follow the expected format '<prefix>/<number>-<description>'. Skipping issue extraction."
+            echo "issue_number=" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update PR Description
+        if: steps.extract_issue.outputs.issue_number
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          ISSUE_NUMBER: ${{ steps.extract_issue.outputs.issue_number }}
+          REPO: ${{ github.repository }}
+        run: |
+          CURRENT_BODY=$(gh pr view "$PR_NUMBER" --json body --jq .body)
+          
+          if [[ "$CURRENT_BODY" == *"#${ISSUE_NUMBER}"* ]]; then
+            echo "PR body already contains '#${ISSUE_NUMBER}'. No update needed."
+            exit 0
+          fi
+          
+          CLOSES_TEXT="Closes #${ISSUE_NUMBER}"
+
+          if [ -z "$CURRENT_BODY" ]; then
+            UPDATED_BODY="$CLOSES_TEXT"
+          else
+            UPDATED_BODY="$(printf '%s\n\n%s' "$CURRENT_BODY" "$CLOSES_TEXT")"
+          fi
+
+          echo "Updating PR #${PR_NUMBER} body."
+          gh pr edit "$PR_NUMBER" --body "$UPDATED_BODY"
