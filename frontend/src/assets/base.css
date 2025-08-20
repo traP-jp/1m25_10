@@ -58,8 +58,11 @@
   font-weight: normal;
 }
 
-body {
+/* body {
   min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
   color: var(--color-text);
   background: var(--color-background);
   transition:
@@ -83,4 +86,4 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
+} */
