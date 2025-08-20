@@ -1,6 +1,6 @@
 <template>
   <router-link :to="path" :class="[$style.sidebarItem, { [$style['is-active']]: isActive }]">
-    <img :src="icon" :alt="title + ' icon'"/>
+    <img :src="icon" :alt="title + ' icon'" />
     <span :class="$style.title">
       {{ title }}
     </span>

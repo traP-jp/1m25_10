@@ -11,7 +11,7 @@ const sidebarItems = [
 <template>
   <div :class="$style.sidebar">
     <div :class="$style.logoContainer">
-      <img :class="$style.logo" src="/dummyLogo.png" alt="Application logo"/>
+      <img :class="$style.logo" src="/dummyLogo.png" alt="Application logo" />
     </div>
     <SidebarItem
       v-for="item in sidebarItems"
