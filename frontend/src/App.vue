@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
-import Sidebar from './components/sideBar/UserSidebar.vue';
+import Sidebar from './components/sideBar/UserSidebar.vue'
 </script>
 
 <template>
@@ -35,12 +35,11 @@ import Sidebar from './components/sideBar/UserSidebar.vue';
   position: fixed;
   top: 0;
   bottom: 0;
-  background-color: #F0F2F5;
+  background-color: #f0f2f5;
   /*色はあとでやる*/
 }
 .main {
   width: calc(100% - 365px);
   margin-left: auto;
 }
-
 </style>
