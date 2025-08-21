@@ -30,7 +30,7 @@ const routes = [
     path: '/saved',
     name: 'saved',
     component: () => import('@/views/SavedView.vue'),
-  }
+  },
 ]
 
 const router = createRouter({
