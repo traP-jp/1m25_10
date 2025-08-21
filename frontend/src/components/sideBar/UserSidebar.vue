@@ -1,11 +1,6 @@
 <script lang="ts" setup>
 import SidebarItem from './SidebarItem.vue'
-
-const sidebarItems = [
-  { title: 'Home', icon: '/dummyHomeIcon.png', path: '/' },
-  { title: 'Albums', icon: '/dummyAlbumsIcon.png', path: '/albums' },
-  { title: 'Saved', icon: '/dummySavedIcon.png', path: '/saved' },
-]
+import { sidebarItems } from './sidebarConfig'
 </script>
 
 <template>
