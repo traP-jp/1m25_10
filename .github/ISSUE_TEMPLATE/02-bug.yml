@@ -1,0 +1,61 @@
+name: "Bug"
+description: "機能が設計通りに動作しない問題を報告"
+title: "[Bug] "
+labels: ["type: bug", "need: triage"]
+body:
+  - type: textarea
+    id: overview
+    attributes:
+      label: "Overview"
+      description: "どのような不具合なのか、簡潔な概要"
+      placeholder: |
+        ex. ログインボタンをクリックしても何も反応しない
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: "Expected Behavior"
+      description: "どのように動作することを期待していたか"
+      placeholder: |
+        ex. ログインボタンをクリックすると、ダッシュボードにリダイレクトされる
+
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: "Actual Behavior"
+      description: "実際の動作はどうか"
+      placeholder: |
+        ex. ログインボタンをクリックしても何も反応しない
+
+  - type: textarea
+    id: reproduction-info
+    attributes:
+      label: "Reproduction"
+      description: "この不具合を再現するための条件や手順"
+      placeholder: |
+        #### 条件
+
+        ...という条件で再現性がある
+
+        #### 手順
+
+        1. `....` にアクセスする
+        2. `....` をクリックする
+
+  - type: textarea
+    id: suggested-fix
+    attributes:
+      label: "Suggested Fix"
+      description: "この不具合に対する推奨する解決策"
+      placeholder: |
+        ex. ログインボタンのクリックイベントにエラーがあるので正しく設定する
+
+  - type: textarea
+    id: references
+    attributes:
+      label: "References"
+      description: "参考情報や、関連情報等あれば"
+      placeholder: |
+        - #123

@@ -1,3 +1,3 @@
 <template>
-  <div>SavedView</div>
+  <div>ImageCard</div>
 </template>
