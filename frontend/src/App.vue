@@ -46,7 +46,7 @@ const isSidebarOpen = ref(true)
   top: 0;
   bottom: 0;
   background-color: #f0f2f5;
-  /*色はあとでやる*/
+  /* TODO: Set color later */
   transition: transform 0.25s ease;
   will-change: transform;
   z-index: 1000;
