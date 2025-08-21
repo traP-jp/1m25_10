@@ -35,7 +35,7 @@ const isActive = computed(() => route.path === props.path)
 
 .sidebarItem:hover {
   background-color: #e2e5e9;
-  /*色はあとでやる*/
+  /* TODO: Set color later */
 }
 
 .title {
