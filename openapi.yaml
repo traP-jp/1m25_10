@@ -42,11 +42,7 @@ paths:
                     id: "01987e0e-bddd-711f-be8a-991b87acaf08"
                     content: ":think-nya:"
         '500':
-          description: サーバーエラー
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/ServerError'
 
   /image/{id}:
     get:
@@ -72,19 +68,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/ImageDetail'
         '404':
-          description: 画像が見つかりません
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                error: "Image not found"
+          $ref: '#/components/responses/NotFound'
         '500':
-          description: サーバーエラー
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/ServerError'
 
   /albums:
     get:
@@ -137,11 +123,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/AlbumItem'
         '500':
-          description: サーバーエラー
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/ServerError'
     post:
       summary: 新しいアルバムを作成
       description: 提供された情報で新しいアルバムを作成します。作成者は認証されたユーザーから決定されます。
@@ -174,11 +156,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
         '500':
-          description: サーバーエラー
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/ServerError'
 
   /albums/{id}:
     get:
@@ -204,19 +182,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Album'
         '404':
-          description: アルバムが見つかりません
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                error: "Album not found"
+          $ref: '#/components/responses/NotFound'
         '500':
-          description: サーバーエラー
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/ServerError'
     put:
       summary: アルバムを更新
       description: 提供された情報で既存のアルバムを更新します
@@ -257,17 +225,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
         '404':
-          description: アルバムが見つかりません
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/NotFound'
         '500':
-          description: サーバーエラー
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/ServerError'
     delete:
       summary: アルバムを削除
       description: 既存のアルバムを削除します
@@ -292,17 +252,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
         '404':
-          description: アルバムが見つかりません
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/NotFound'
         '500':
-          description: サーバーエラー
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/ServerError'
 
 components:
   schemas:
