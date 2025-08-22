@@ -2,6 +2,9 @@ name: PR Gate
 
 on:
   pull_request:
+  push:
+    branches:
+      - main
 
 permissions:
   contents: read
@@ -14,6 +17,7 @@ jobs:
   changes:
     name: Detect Changes
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       frontend: ${{ steps.filter.outputs.frontend }}
       backend: ${{ steps.filter.outputs.backend }}
@@ -39,8 +43,6 @@ jobs:
     needs: changes
     if: needs.changes.outputs.frontend == 'true'
     uses: ./.github/workflows/reusable-frontend-ci.yml
-    # secrets を渡す場合はここに記述
-    # secrets: inherit
 
   # バックエンドCIを呼び出すジョブ
   backend-ci:
@@ -52,19 +54,29 @@ jobs:
   # 必須チェックとして登録するためのジョブ
   required-checks:
     name: Required Checks
-    needs: [frontend-ci, backend-ci]
+    needs: [changes, frontend-ci, backend-ci]
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     if: always()
     steps:
       - name: Verify CI results
         run: |
+          set -euo pipefail
           # needs コンテキストから各ジョブの結果を取得
           # result は success, failure, cancelled, skipped のいずれか
+          changes_result="${{ needs.changes.result }}"
           frontend_result="${{ needs.frontend-ci.result }}"
           backend_result="${{ needs.backend-ci.result }}"
 
+          echo "Changes job result: $changes_result"
           echo "Frontend CI result: $frontend_result"
           echo "Backend CI result: $backend_result"
+
+          # changes が失敗した場合もブロック（paths-filter失敗等の検知漏れを防ぐ）
+          if [[ "$changes_result" == "failure" || "$changes_result" == "cancelled" ]]; then
+            echo "❌ Changes detection job has failed."
+            exit 1
+          fi
 
           # 失敗したジョブがないかチェック
           # 'skipped' は変更がなかったということなので成功とみなす
