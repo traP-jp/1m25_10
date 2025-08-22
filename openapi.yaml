@@ -14,7 +14,7 @@ servers:
     description: 本番サーバー
 
 paths:
-  /image:
+  /images:
     get:
       summary: 全ての画像を取得
       description: 全ての画像の詳細情報を配列で返します
@@ -44,7 +44,7 @@ paths:
         '500':
           $ref: '#/components/responses/ServerError'
 
-  /image/{id}:
+  /images/{id}:
     get:
       summary: IDで画像詳細を取得
       description: 特定の画像の作成者と投稿データを含む詳細情報を返します
