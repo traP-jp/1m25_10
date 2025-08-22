@@ -1,73 +1,70 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { RouterView } from 'vue-router'
-import TheSideBar from './components/TheSideBar.vue'
+import Sidebar from './components/sidebar/UserSidebar.vue'
+
+// TODO: 将来的に Pinia の uiStore に移行予定
+// ex. `const ui = useUiStore(); const isSidebarOpen = storeToRefs(ui).isSidebarOpen`
+const isSidebarOpen = ref(true)
 </script>
 
 <template>
-  <TheSideBar />
-  <RouterView />
+  <div :class="$style.app" :data-sidebar-open="isSidebarOpen">
+    <aside :class="$style.sidebar">
+      <Sidebar />
+    </aside>
+    <main :class="$style.main">
+      <RouterView />
+    </main>
+  </div>
 </template>
 
-<style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
-}
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-nav {
+<style lang="scss" module>
+.app {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  align-items: start;
   width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
+  min-height: 100svh;
+  gap: 16px;
+  --sidebar-width: clamp(240px, 25vw, 365px);
+  padding-inline-start: var(--sidebar-width);
+}
+.sidebar {
+  box-sizing: border-box;
+  display: flex;
+  width: var(--sidebar-width);
+  height: 100%;
+  padding: 40px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  flex-shrink: 0;
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background-color: #f0f2f5;
+  /* TODO: Set color later */
+  transition: transform 0.25s ease;
+  will-change: transform;
+  z-index: 1000;
+}
+.main {
+  width: 100%;
 }
 
-nav a.router-link-exact-active {
-  color: var(--color-text);
+.app[data-sidebar-open='false'] .sidebar {
+  transform: translateX(calc(-1 * var(--sidebar-width)));
+}
+.app[data-sidebar-open='false'] {
+  padding-inline-start: 0;
 }
 
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
-}
-
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
-}
-
-nav a:first-of-type {
-  border: 0;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
-    margin-top: 1rem;
+@media (prefers-reduced-motion: reduce) {
+  .sidebar {
+    transition: none;
   }
 }
 </style>
