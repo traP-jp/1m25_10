@@ -4,10 +4,15 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type Repository struct {
+type Repository interface {
+	AlbumRepository
+	UserRepository
+}
+
+type sqlRepositoryImpl struct {
 	db *sqlx.DB
 }
 
-func New(db *sqlx.DB) *Repository {
-	return &Repository{db: db}
+func New(db *sqlx.DB) Repository {
+	return &sqlRepositoryImpl{db: db}
 }

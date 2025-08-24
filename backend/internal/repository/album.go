@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/jmoiron/sqlx"
 )
 
 type AlbumRepository interface {
@@ -63,14 +62,6 @@ type (
 	}
 )
 
-type sqlAlbumRepository struct {
-	db *sqlx.DB
-}
-
-func NewAlbumRepository(db *sqlx.DB) AlbumRepository {
-	return &sqlAlbumRepository{db: db}
-}
-
 // uuidの配列をdbに保存するための型(json形式で保存)
 type dbUUIDs []uuid.UUID
 
@@ -106,13 +97,13 @@ type dbAlbum struct {
 }
 
 type dbAlbumItem struct {
-		Id      uuid.UUID `db:"id"`
-		Title   string    `db:"title"`
-		Creator uuid.UUID `db:"creator"`
-	}
+	Id      uuid.UUID `db:"id"`
+	Title   string    `db:"title"`
+	Creator uuid.UUID `db:"creator"`
+}
 
 // GetAlbums retrieves albums based on the provided filter.
-func (r *sqlAlbumRepository) GetAlbums(ctx context.Context, filter AlbumFilter) ([]AlbumItem, error) {
+func (r *sqlRepositoryImpl) GetAlbums(ctx context.Context, filter AlbumFilter) ([]AlbumItem, error) {
 	query := `SELECT id, title, creator FROM albums WHERE 1=1`
 	args := []interface{}{}
 
@@ -165,7 +156,7 @@ func (r *sqlAlbumRepository) GetAlbums(ctx context.Context, filter AlbumFilter) 
 }
 
 // PostAlbum creates a new album and returns its ID
-func (r *sqlAlbumRepository) PostAlbum(ctx context.Context, params PostAlbumParams) (*Album, error) {
+func (r *sqlRepositoryImpl) PostAlbum(ctx context.Context, params PostAlbumParams) (*Album, error) {
 	query := `
 		INSERT INTO albums (id, title, description, creator, images, created_at, updated_at)
 		VALUES (:id, :title, :description, :creator, :images, :created_at, :updated_at)
@@ -199,7 +190,7 @@ func (r *sqlAlbumRepository) PostAlbum(ctx context.Context, params PostAlbumPara
 var ErrNotFound = errors.New("not found")
 
 // GetAlbum retrieves an album by its ID
-func (r *sqlAlbumRepository) GetAlbum(ctx context.Context, albumID uuid.UUID) (*Album, error) {
+func (r *sqlRepositoryImpl) GetAlbum(ctx context.Context, albumID uuid.UUID) (*Album, error) {
 	var dbAlbumModel dbAlbum
 	query := `
 		SELECT id, title, description, creator, images, created_at, updated_at
@@ -227,7 +218,7 @@ func (r *sqlAlbumRepository) GetAlbum(ctx context.Context, albumID uuid.UUID) (*
 }
 
 // DeleteAlbum deletes an album by its ID
-func (r *sqlAlbumRepository) DeleteAlbum(ctx context.Context, albumID uuid.UUID) error {
+func (r *sqlRepositoryImpl) DeleteAlbum(ctx context.Context, albumID uuid.UUID) error {
 	if albumID == uuid.Nil {
 		return fmt.Errorf("invalid album id")
 	}
@@ -255,7 +246,7 @@ func (r *sqlAlbumRepository) DeleteAlbum(ctx context.Context, albumID uuid.UUID)
 var ErrNoFieldsToUpdate = errors.New("no fields to update")
 
 // UpdateAlbum updates an album with the given parameters
-func (r *sqlAlbumRepository) UpdateAlbum(ctx context.Context, albumID uuid.UUID, params UpdateAlbumParams) error {
+func (r *sqlRepositoryImpl) UpdateAlbum(ctx context.Context, albumID uuid.UUID, params UpdateAlbumParams) error {
 	if albumID == uuid.Nil {
 		return fmt.Errorf("invalid album id")
 	}

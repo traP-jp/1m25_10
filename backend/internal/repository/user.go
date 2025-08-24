@@ -7,6 +7,12 @@ import (
 	"github.com/google/uuid"
 )
 
+type UserRepository interface {
+	GetUsers(ctx context.Context) ([]*User, error)
+	CreateUser(ctx context.Context, params CreateUserParams) (uuid.UUID, error)
+	GetUser(ctx context.Context, userID uuid.UUID) (*User, error)
+}
+
 type (
 	// users table
 	User struct {
@@ -21,7 +27,7 @@ type (
 	}
 )
 
-func (r *Repository) GetUsers(ctx context.Context) ([]*User, error) {
+func (r *sqlRepositoryImpl) GetUsers(ctx context.Context) ([]*User, error) {
 	users := []*User{}
 	if err := r.db.SelectContext(ctx, &users, "SELECT * FROM users"); err != nil {
 		return nil, fmt.Errorf("select users: %w", err)
@@ -30,7 +36,7 @@ func (r *Repository) GetUsers(ctx context.Context) ([]*User, error) {
 	return users, nil
 }
 
-func (r *Repository) CreateUser(ctx context.Context, params CreateUserParams) (uuid.UUID, error) {
+func (r *sqlRepositoryImpl) CreateUser(ctx context.Context, params CreateUserParams) (uuid.UUID, error) {
 	userID := uuid.New()
 	if _, err := r.db.ExecContext(ctx, "INSERT INTO users (id, name, email) VALUES (?, ?, ?)", userID, params.Name, params.Email); err != nil {
 		return uuid.Nil, fmt.Errorf("insert user: %w", err)
@@ -39,7 +45,7 @@ func (r *Repository) CreateUser(ctx context.Context, params CreateUserParams) (u
 	return userID, nil
 }
 
-func (r *Repository) GetUser(ctx context.Context, userID uuid.UUID) (*User, error) {
+func (r *sqlRepositoryImpl) GetUser(ctx context.Context, userID uuid.UUID) (*User, error) {
 	user := &User{}
 	if err := r.db.GetContext(ctx, user, "SELECT * FROM users WHERE id = ?", userID); err != nil {
 		return nil, fmt.Errorf("select user: %w", err)
