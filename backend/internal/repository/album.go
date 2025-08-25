@@ -3,8 +3,6 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"database/sql/driver"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -48,6 +46,12 @@ type (
 		//あとはIsFavorite(*bool)とか？
 	}
 
+	AlbumImage struct {
+		Id      uuid.UUID `db:"id"`
+		AlbumID uuid.UUID `db:"album_id"`
+		ImageID uuid.UUID `db:"image_id"`
+	}
+
 	PostAlbumParams struct {
 		Title       string
 		Description string
@@ -62,36 +66,11 @@ type (
 	}
 )
 
-// uuidの配列をdbに保存するための型(json形式で保存)
-type dbUUIDs []uuid.UUID
-
-// dbUUIDsをjsonに変換
-func (u dbUUIDs) Value() (driver.Value, error) {
-	if u == nil {
-		return nil, nil
-	}
-	return json.Marshal(u)
-}
-
-// jsonからdbUUIDsを復元
-func (u *dbUUIDs) Scan(value interface{}) error {
-	if value == nil {
-		*u = nil
-		return nil
-	}
-	b, ok := value.([]byte)
-	if !ok {
-		return errors.New("type assertion to []byte failed")
-	}
-	return json.Unmarshal(b, u)
-}
-
 type dbAlbum struct {
 	Id          uuid.UUID `db:"id"`
 	Title       string    `db:"title"`
 	Description string    `db:"description"`
 	Creator     uuid.UUID `db:"creator"`
-	Images      dbUUIDs   `db:"images"`
 	CreatedAt   time.Time `db:"created_at"`
 	UpdatedAt   time.Time `db:"updated_at"`
 }
@@ -158,8 +137,8 @@ func (r *sqlRepositoryImpl) GetAlbums(ctx context.Context, filter AlbumFilter) (
 // PostAlbum creates a new album and returns its ID
 func (r *sqlRepositoryImpl) PostAlbum(ctx context.Context, params PostAlbumParams) (*Album, error) {
 	query := `
-		INSERT INTO albums (id, title, description, creator, images, created_at, updated_at)
-		VALUES (:id, :title, :description, :creator, :images, :created_at, :updated_at)
+		INSERT INTO albums (id, title, description, creator, created_at, updated_at)
+		VALUES (:id, :title, :description, :creator, :created_at, :updated_at)
 	`
 	now := time.Now()
 	newAlbum := dbAlbum{
@@ -167,7 +146,6 @@ func (r *sqlRepositoryImpl) PostAlbum(ctx context.Context, params PostAlbumParam
 		Title:       params.Title,
 		Description: params.Description,
 		Creator:     params.Creator,
-		Images:      dbUUIDs(params.Images),
 		CreatedAt:   now,
 		UpdatedAt:   now,
 	}
@@ -176,12 +154,28 @@ func (r *sqlRepositoryImpl) PostAlbum(ctx context.Context, params PostAlbumParam
 		return nil, err
 	}
 
+	query = `
+		INSERT INTO album_images (id, album_id, image_id)
+		VALUES (:id, :album_id, :image_id)
+	`
+	for _, imgID := range params.Images {
+		newAlbumImage := AlbumImage{
+			Id:      uuid.New(),
+			AlbumID: newAlbum.Id,
+			ImageID: imgID,
+		}
+		_, err := r.db.NamedExecContext(ctx, query, newAlbumImage)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return &Album{
 		Id:          newAlbum.Id,
 		Title:       newAlbum.Title,
 		Description: newAlbum.Description,
 		Creator:     newAlbum.Creator,
-		Images:      []uuid.UUID(newAlbum.Images),
+		Images:      params.Images,
 		CreatedAt:   newAlbum.CreatedAt,
 		UpdatedAt:   newAlbum.UpdatedAt,
 	}, nil
@@ -193,7 +187,7 @@ var ErrNotFound = errors.New("not found")
 func (r *sqlRepositoryImpl) GetAlbum(ctx context.Context, albumID uuid.UUID) (*Album, error) {
 	var dbAlbumModel dbAlbum
 	query := `
-		SELECT id, title, description, creator, images, created_at, updated_at
+		SELECT id, title, description, creator, created_at, updated_at
 		FROM albums
 		WHERE id = ?
 		`
@@ -206,12 +200,31 @@ func (r *sqlRepositoryImpl) GetAlbum(ctx context.Context, albumID uuid.UUID) (*A
 		return nil, fmt.Errorf("failed to get album (id=%s) : %w", albumID, err)
 
 	}
+
+	var imageIDs []struct {
+		ImageID uuid.UUID `db:"image_id"`
+	}
+	query = `
+		SELECT image_id
+		FROM album_images
+		WHERE album_id = ?
+	`
+	query = r.db.Rebind(query)
+	err = r.db.SelectContext(ctx, &imageIDs, query, albumID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get album images (album_id=%s) : %w", albumID, err)
+	}
+	images := make([]uuid.UUID, len(imageIDs))
+	for i, id := range imageIDs {
+		images[i] = id.ImageID
+	}
+
 	return &Album{
 		Id:          dbAlbumModel.Id,
 		Title:       dbAlbumModel.Title,
 		Description: dbAlbumModel.Description,
 		Creator:     dbAlbumModel.Creator,
-		Images:      dbAlbumModel.Images,
+		Images:      images,
 		CreatedAt:   dbAlbumModel.CreatedAt,
 		UpdatedAt:   dbAlbumModel.UpdatedAt,
 	}, nil
@@ -263,8 +276,32 @@ func (r *sqlRepositoryImpl) UpdateAlbum(ctx context.Context, albumID uuid.UUID, 
 		args = append(args, *params.Description)
 	}
 	if params.Images != nil {
-		sets = append(sets, "images = ?")
-		args = append(args, dbUUIDs(*params.Images))
+		// Imageは差分更新できるようにしてもいいかもしれない
+		// 以下のコードは全て置き換える実装
+		// 既存の関係を削除
+		delQuery := `DELETE FROM album_images WHERE album_id = ?`
+		delQuery = r.db.Rebind(delQuery)
+		_, err := r.db.ExecContext(ctx, delQuery, albumID)
+		if err != nil {
+			return fmt.Errorf("failed to delete existing album images (album_id=%s): %w", albumID, err)
+		}
+
+		// 新しい関係を挿入
+		insQuery := `
+			INSERT INTO album_images (id, album_id, image_id)
+			VALUES (:id, :album_id, :image_id)
+		`
+		for _, imgID := range *params.Images {
+			newAlbumImage := AlbumImage{
+				Id:      uuid.New(),
+				AlbumID: albumID,
+				ImageID: imgID,
+			}
+			_, err := r.db.NamedExecContext(ctx, insQuery, newAlbumImage)
+			if err != nil {
+				return fmt.Errorf("failed to insert new album image (album_id=%s, image_id=%s): %w", albumID, imgID, err)
+			}
+		}
 	}
 
 	if len(sets) == 0 {
