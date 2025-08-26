@@ -11,56 +11,16 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/traP-jp/1m25_10/backend/internal/domain"
 )
 
 type AlbumRepository interface {
-	GetAlbums(ctx context.Context, filter AlbumFilter) ([]AlbumItem, error)
-	PostAlbum(ctx context.Context, params PostAlbumParams) (*Album, error)
-	GetAlbum(ctx context.Context, albumID uuid.UUID) (*Album, error)
+	GetAlbums(ctx context.Context, filter domain.AlbumFilter) ([]domain.AlbumItem, error)
+	PostAlbum(ctx context.Context, params domain.PostAlbumParams) (*domain.Album, error)
+	GetAlbum(ctx context.Context, albumID uuid.UUID) (*domain.Album, error)
 	DeleteAlbum(ctx context.Context, albumID uuid.UUID) error
-	UpdateAlbum(ctx context.Context, albumID uuid.UUID, params UpdateAlbumParams) error
+	UpdateAlbum(ctx context.Context, albumID uuid.UUID, params domain.UpdateAlbumParams) error
 }
-
-// TODO: Domainで適切に定義予定（issue #27）
-type (
-	Album struct {
-		Id          uuid.UUID
-		Title       string
-		Description string
-		Creator     uuid.UUID
-		Images      []uuid.UUID
-		CreatedAt   time.Time
-		UpdatedAt   time.Time
-	}
-
-	AlbumItem struct {
-		Id      uuid.UUID
-		Title   string
-		Creator uuid.UUID
-	}
-
-	AlbumFilter struct {
-		CreatorID  *uuid.UUID
-		BeforeDate *time.Time // Filter by created_at
-		AfterDate  *time.Time // Filter by created_at
-		Limit      *int
-		Offset     *int
-		//あとはIsFavorite(*bool)とか？
-	}
-
-	PostAlbumParams struct {
-		Title       string
-		Description string
-		Creator     uuid.UUID
-		Images      []uuid.UUID
-	}
-
-	UpdateAlbumParams struct {
-		Title       *string
-		Description *string
-		Images      *[]uuid.UUID
-	}
-)
 
 // uuidの配列をdbに保存するための型(json形式で保存)
 type dbUUIDs []uuid.UUID
@@ -103,7 +63,7 @@ type dbAlbumItem struct {
 }
 
 // GetAlbums retrieves albums based on the provided filter.
-func (r *sqlRepositoryImpl) GetAlbums(ctx context.Context, filter AlbumFilter) ([]AlbumItem, error) {
+func (r *sqlRepositoryImpl) GetAlbums(ctx context.Context, filter domain.AlbumFilter) ([]domain.AlbumItem, error) {
 	query := `SELECT id, title, creator FROM albums WHERE 1=1`
 	args := []interface{}{}
 
@@ -147,16 +107,16 @@ func (r *sqlRepositoryImpl) GetAlbums(ctx context.Context, filter AlbumFilter) (
 		return nil, fmt.Errorf("failed to select album items: %w", err)
 	}
 
-	items := make([]AlbumItem, len(dbItems))
+	items := make([]domain.AlbumItem, len(dbItems))
 	for i, d := range dbItems {
-		items[i] = AlbumItem(d)
+		items[i] = domain.AlbumItem(d)
 	}
 
 	return items, nil
 }
 
 // PostAlbum creates a new album and returns its ID
-func (r *sqlRepositoryImpl) PostAlbum(ctx context.Context, params PostAlbumParams) (*Album, error) {
+func (r *sqlRepositoryImpl) PostAlbum(ctx context.Context, params domain.PostAlbumParams) (*domain.Album, error) {
 	query := `
 		INSERT INTO albums (id, title, description, creator, images, created_at, updated_at)
 		VALUES (:id, :title, :description, :creator, :images, :created_at, :updated_at)
@@ -176,7 +136,7 @@ func (r *sqlRepositoryImpl) PostAlbum(ctx context.Context, params PostAlbumParam
 		return nil, err
 	}
 
-	return &Album{
+	return &domain.Album{
 		Id:          newAlbum.Id,
 		Title:       newAlbum.Title,
 		Description: newAlbum.Description,
@@ -187,10 +147,8 @@ func (r *sqlRepositoryImpl) PostAlbum(ctx context.Context, params PostAlbumParam
 	}, nil
 }
 
-var ErrNotFound = errors.New("not found")
-
 // GetAlbum retrieves an album by its ID
-func (r *sqlRepositoryImpl) GetAlbum(ctx context.Context, albumID uuid.UUID) (*Album, error) {
+func (r *sqlRepositoryImpl) GetAlbum(ctx context.Context, albumID uuid.UUID) (*domain.Album, error) {
 	var dbAlbumModel dbAlbum
 	query := `
 		SELECT id, title, description, creator, images, created_at, updated_at
@@ -201,12 +159,12 @@ func (r *sqlRepositoryImpl) GetAlbum(ctx context.Context, albumID uuid.UUID) (*A
 	err := r.db.GetContext(ctx, &dbAlbumModel, query, albumID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, ErrNotFound
+			return nil, domain.ErrNotFound
 		}
 		return nil, fmt.Errorf("failed to get album (id=%s) : %w", albumID, err)
 
 	}
-	return &Album{
+	return &domain.Album{
 		Id:          dbAlbumModel.Id,
 		Title:       dbAlbumModel.Title,
 		Description: dbAlbumModel.Description,
@@ -238,15 +196,13 @@ func (r *sqlRepositoryImpl) DeleteAlbum(ctx context.Context, albumID uuid.UUID) 
 		return fmt.Errorf("failed to get rows affected (id=%s) : %w", albumID, err)
 	}
 	if ra == 0 {
-		return ErrNotFound
+		return domain.ErrNotFound
 	}
 	return nil
 }
 
-var ErrNoFieldsToUpdate = errors.New("no fields to update")
-
 // UpdateAlbum updates an album with the given parameters
-func (r *sqlRepositoryImpl) UpdateAlbum(ctx context.Context, albumID uuid.UUID, params UpdateAlbumParams) error {
+func (r *sqlRepositoryImpl) UpdateAlbum(ctx context.Context, albumID uuid.UUID, params domain.UpdateAlbumParams) error {
 	if albumID == uuid.Nil {
 		return fmt.Errorf("invalid album id")
 	}
@@ -268,7 +224,7 @@ func (r *sqlRepositoryImpl) UpdateAlbum(ctx context.Context, albumID uuid.UUID, 
 	}
 
 	if len(sets) == 0 {
-		return ErrNoFieldsToUpdate
+		return domain.ErrNoFieldsToUpdate
 	}
 
 	sets = append(sets, "updated_at = ?")
@@ -288,7 +244,7 @@ func (r *sqlRepositoryImpl) UpdateAlbum(ctx context.Context, albumID uuid.UUID, 
 		return fmt.Errorf("rows affected error (id=%s): %w", albumID, err)
 	}
 	if ra == 0 {
-		return ErrNotFound
+		return domain.ErrNotFound
 	}
 	return nil
 }
