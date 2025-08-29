@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "vite",
+    "dev:mock": "run-p dev mock",
     "build": "run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
     "build-only": "vite build",
@@ -15,7 +16,8 @@
     "lint": "eslint . --fix",
     "lint:ci": "eslint . --max-warnings=0",
     "format": "prettier --write src/",
-    "format:check": "prettier --check src/"
+    "format:check": "prettier --check src/",
+    "mock": "json-server --port 3001 mock/db.json"
   },
   "dependencies": {
     "pinia": "^3.0.3",
@@ -32,6 +34,7 @@
     "eslint": "^9.31.0",
     "eslint-plugin-vue": "~10.3.0",
     "jiti": "^2.4.2",
+    "json-server": "^1.0.0-beta.3",
     "npm-run-all2": "^8.0.4",
     "prettier": "3.6.2",
     "sass-embedded": "^1.90.0",
