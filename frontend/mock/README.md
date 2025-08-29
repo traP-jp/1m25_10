@@ -81,20 +81,6 @@ VITE_MOCK_ENABLED=false
 GET /albums?creator_id=550e8400-e29b-41d4-a716-446655441001&limit=10
 ```
 
-## 🧪 テスト
-
-APIのテスト用コンポーネントを用意しています：
-
-```vue
-<template>
-  <ApiTest />
-</template>
-
-<script setup>
-import ApiTest from '@/components/ApiTest.vue'
-</script>
-```
-
 ## 📝 データ形式
 
 ### Image
