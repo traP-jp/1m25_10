@@ -1,4 +1,4 @@
-name: PR body updater
+name: PR Automation
 
 on:
   pull_request:
