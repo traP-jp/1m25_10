@@ -68,11 +68,11 @@ jobs:
           GH_REPO: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          ASSIGNEE_COUNT=$(gh pr view $PR_NUMBER --json assignees --jq '(.assignees | length)')
+          ASSIGNEE_COUNT=$(gh pr view "$PR_NUMBER" --json assignees --jq '(.assignees | length)')
 
           if [ "$ASSIGNEE_COUNT" -eq 0 ]; then
             echo "No assignees found. Assigning the author: ${{ github.actor }}"
-            gh pr edit $PR_NUMBER --add-assignee ${{ github.actor }}
+            gh pr edit "$PR_NUMBER" --add-assignee "${{ github.actor }}"
           else
             echo "This PR already has $ASSIGNEE_COUNT assignee(s). Skipping."
           fi
