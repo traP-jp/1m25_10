@@ -18,7 +18,7 @@ type (
 
 // GET /api/v1/albums
 func (h *Handler) GetAlbums(c echo.Context) error {
-	creatorIdStr := c.Param("creator_id")
+	creatorIdStr := c.QueryParam("creator_id")
 	var creatorId *uuid.UUID
 	if creatorIdStr != "" {
 		creatorIdParsed, err := uuid.Parse(creatorIdStr)
@@ -27,27 +27,25 @@ func (h *Handler) GetAlbums(c echo.Context) error {
 		}
 		creatorId = &creatorIdParsed
 	}
-	beforeDateStr := c.Param("before_date")
+	beforeDateStr := c.QueryParam("before_date")
 	var beforeDate *time.Time
 	if beforeDateStr != "" {
-		layout := "0000-01-01T00:00:00.000000Z"
-		beforeDateParsed, err := time.Parse(layout, beforeDateStr)
+		beforeDateParsed, err := time.Parse(time.RFC3339, beforeDateStr)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, "Invalid before date")
 		}
 		beforeDate = &beforeDateParsed
 	}
-	afterDateStr := c.Param("after_date")
+	afterDateStr := c.QueryParam("after_date")
 	var afterDate *time.Time
 	if afterDateStr != "" {
-		layout := "0000-01-01T00:00:00.000000Z"
-		afterDateParsed, err := time.Parse(layout, afterDateStr)
+		afterDateParsed, err := time.Parse(time.RFC3339, afterDateStr)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, "Invalid after date")
 		}
 		afterDate = &afterDateParsed
 	}
-	limitStr := c.Param("limit")
+	limitStr := c.QueryParam("limit")
 	var limit *int
 	if limitStr != "" {
 		limitParsed, err := strconv.Atoi(limitStr)
@@ -56,7 +54,7 @@ func (h *Handler) GetAlbums(c echo.Context) error {
 		}
 		limit = &limitParsed
 	}
-	offsetStr := c.Param("offset")
+	offsetStr := c.QueryParam("offset")
 	var offset *int
 	if offsetStr != "" {
 		offsetParsed, err := strconv.Atoi(offsetStr)
