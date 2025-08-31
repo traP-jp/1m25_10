@@ -11,11 +11,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// スキーマ定義
-type (
-	GetAlbumsResponse []domain.AlbumItem
-)
-
 // GET /api/v1/albums
 func (h *Handler) GetAlbums(c echo.Context) error {
 	creatorIdStr := c.QueryParam("creator_id")
@@ -74,14 +69,5 @@ func (h *Handler) GetAlbums(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	response := make(GetAlbumsResponse, len(albums))
-	for i, album := range albums {
-		response[i] = domain.AlbumItem{
-			Id:      album.Id,
-			Title:   album.Title,
-			Creator: album.Creator,
-		}
-	}
-
-	return c.JSON(http.StatusOK, response)
+	return c.JSON(http.StatusOK, albums)
 }
