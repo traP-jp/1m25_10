@@ -19,19 +19,14 @@ const toggleSelection = () => {
 
 <template>
   <div :class="[$style.imageCard, { [$style.selected]: isSelected }]">
-    <img
-      :src="props.url"
-      :alt="props.alt"
-      :class="$style.image"
-    />
+    <img :src="props.url" :alt="props.alt" :class="$style.image" />
     <div :class="[$style.overlay, { [$style.selected]: isSelected }]">
       <div :class="$style.overlayContent">
         <div
           :class="[$style.checkButton, { [$style.selected]: isSelected }]"
           @click="toggleSelection"
         >
-          <svg viewBox="0 0 24 24" fill="none">
-          </svg>
+          <svg viewBox="0 0 24 24" fill="none"></svg>
         </div>
       </div>
     </div>
@@ -44,7 +39,7 @@ const toggleSelection = () => {
   height: 196px;
   overflow: hidden;
   position: relative;
-  background-color: var(--Light-UI-Tertiary, #CED6DB);
+  background-color: var(--Light-UI-Tertiary, #ced6db);
   transition: all 0.3s ease;
 
   &.selected {
@@ -92,7 +87,7 @@ const toggleSelection = () => {
   height: 32px;
   border-radius: 50%;
   background-color: transparent;
-  border: 2px solid #CED6DB;
+  border: 2px solid #ced6db;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -103,7 +98,7 @@ const toggleSelection = () => {
   svg {
     width: 24px;
     height: 24px;
-    color: #005BAC;
+    color: #005bac;
   }
 
   &:hover {
@@ -112,7 +107,7 @@ const toggleSelection = () => {
   }
 
   &.selected {
-    background-color: #005BAC;
+    background-color: #005bac;
     svg {
       color: white;
     }
