@@ -18,7 +18,7 @@ const toggleSelection = () => {
 </script>
 
 <template>
-  <div :class="$style.imageCard">
+  <div :class="[$style.imageCard, { [$style.selected]: isSelected }]">
     <img
       :src="props.url"
       :alt="props.alt"
@@ -45,6 +45,14 @@ const toggleSelection = () => {
   overflow: hidden;
   position: relative;
   background-color: var(--Light-UI-Tertiary, #CED6DB);
+  transition: all 0.3s ease;
+
+  &.selected {
+    .image {
+      transform: scale(0.8);
+      border-radius: 8px;
+    }
+  }
 }
 
 .image {
@@ -52,6 +60,7 @@ const toggleSelection = () => {
   height: 100%;
   object-fit: cover;
   display: block;
+  transition: transform 0.3s ease;
 }
 
 .overlay {
@@ -60,7 +69,7 @@ const toggleSelection = () => {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(206, 214, 219, 0.35);
+  background-color: rgba(206, 214, 219, 0.3);
   display: flex;
   justify-content: flex-start;
   align-items: flex-start;
