@@ -34,6 +34,7 @@ func (h *Handler) SetupRoutes(api *echo.Group) {
 	// album API
 	albumAPI := api.Group("/albums")
 	{
+		albumAPI.GET("", h.GetAlbums)
 		albumAPI.GET("/:id", h.GetAlbum)
 	}
 }
