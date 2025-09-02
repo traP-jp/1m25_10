@@ -8,7 +8,6 @@ import (
 	"github.com/traP-jp/1m25_10/backend/internal/domain"
 )
 
-
 func (h *Handler) GetAlbum(c echo.Context) error {
 	albumID, err := uuid.Parse(c.Param("id"))
 	if err != nil {
