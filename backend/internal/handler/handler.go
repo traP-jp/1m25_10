@@ -30,4 +30,10 @@ func (h *Handler) SetupRoutes(api *echo.Group) {
 		userAPI.POST("", h.CreateUser)
 		userAPI.GET("/:userID", h.GetUser)
 	}
+
+	// album API
+	albumAPI := api.Group("/albums")
+	{
+		albumAPI.GET("", h.GetAlbums)
+	}
 }
