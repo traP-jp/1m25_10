@@ -8,10 +8,6 @@ interface Props {
 const props = defineProps<Props>()
 const isSelected = ref(false)
 
-// const imageUrl = computed(() => {
-//   return `https://q.trap.jp/files/${props.imageId}`
-// })
-
 const toggleSelection = () => {
   isSelected.value = !isSelected.value
 }
