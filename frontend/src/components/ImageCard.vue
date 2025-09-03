@@ -17,14 +17,16 @@ const toggleSelection = () => {
   <div
     :class="[$style.imageCard, { [$style.selected]: isSelected }]"
     tabindex="0"
-    @click="toggleSelection"
     @keydown.enter="toggleSelection"
     @keydown.space.prevent="toggleSelection"
   >
     <img :src="props.url" :alt="props.alt" :class="$style.image" />
     <div :class="[$style.overlay, { [$style.selected]: isSelected }]">
       <div :class="$style.overlayContent">
-        <div :class="[$style.checkButton, { [$style.selected]: isSelected }]">
+        <div
+          :class="[$style.checkButton, { [$style.selected]: isSelected }]"
+          @click.stop="toggleSelection"
+        >
           <svg viewBox="0 0 24 24" fill="none" :class="$style.checkIcon">
             <path
               d="M5 13l4 4L19 7"
