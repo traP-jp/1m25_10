@@ -1,6 +1,6 @@
 export type SidebarItem = {
   title: string
-  icon: string
+  icon?: string
   path: string
 }
 
