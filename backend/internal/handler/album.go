@@ -71,3 +71,18 @@ func (h *Handler) GetAlbums(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, albums)
 }
+
+func (h *Handler) GetAlbum(c echo.Context) error {
+	albumID, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid album ID")
+	}
+	album, err := h.repo.GetAlbum(c.Request().Context(), albumID)
+	if err != nil {
+		if err == domain.ErrNotFound {
+			return echo.NewHTTPError(http.StatusNotFound, "Album not found")
+		}
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to retrieve album")
+	}
+	return c.JSON(http.StatusOK, album)
+}
