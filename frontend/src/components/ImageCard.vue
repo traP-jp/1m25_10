@@ -60,7 +60,7 @@ const toggleSelection = () => {
 
   &:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(0, 91, 172, 0.3);
+    box-shadow: 0 0 0 4px rgba(0, 91, 172, 0.5);
   }
 
   &.selected {
