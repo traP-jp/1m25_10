@@ -16,7 +16,7 @@ func New(repo repository.Repository) *Handler {
 	}
 }
 
-func (h *Handler) SetupRoutes(api *echo.Group) {
+func (h *Handler) SetupAppRoutes(api *echo.Group) {
 	// ping API
 	pingAPI := api.Group("/ping")
 	{
