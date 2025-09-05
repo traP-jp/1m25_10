@@ -153,7 +153,7 @@ func setTempCookie(c echo.Context, name, val string, maxAge time.Duration) {
 		Value:    val,
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   false, // ローカルHTTPのため。HTTPS環境ではtrueに。
+	Secure:   config.CookieSecure(),
 		SameSite: http.SameSiteLaxMode,
 		MaxAge:   int(maxAge / time.Second),
 	}
@@ -166,7 +166,7 @@ func setAuthCookie(c echo.Context, name, val string, maxAge time.Duration) {
 		Value:    val,
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   false, // dev only
+	Secure:   config.CookieSecure(),
 		SameSite: http.SameSiteLaxMode,
 		MaxAge:   int(maxAge / time.Second),
 	}
@@ -179,7 +179,7 @@ func delCookie(c echo.Context, name string) {
 		Value:    "",
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   false,
+	Secure:   config.CookieSecure(),
 		SameSite: http.SameSiteLaxMode,
 		MaxAge:   -1,
 		Expires:  time.Unix(0, 0),
