@@ -101,11 +101,11 @@ func (h *Handler) PostAlbum(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request body")
 	}
 
-	creatorStr, ok := c.Get(middleware.UsernameKey).(string)
+	creator, ok := c.Get(middleware.UsernameKey).(string)
 	if !ok {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
 	}
-	creatorStr = strings.TrimSpace(creatorStr) //TODO: 削除 (Issue #110)
+	creator = strings.TrimSpace(creator) //TODO: 削除 (Issue #110)
 
 	images := make([]uuid.UUID, 0, len(req.Images))
 	for _, s := range req.Images {
@@ -123,14 +123,14 @@ func (h *Handler) PostAlbum(c echo.Context) error {
 	params := domain.PostAlbumParams{
 		Title:       req.Title,
 		Description: req.Description,
-		Creator:     uuid.New(), // TODO: set Creator from creatorStr (Issue #110)
+		Creator:     uuid.New(), // TODO: creatorに変更 (Issue #110)
 		Images:      images,
 	}
 
 	album, err := h.repo.PostAlbum(c.Request().Context(), params)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, "Failed to create album")
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create album")
 	}
-	return c.JSON(http.StatusOK, album)
+	return c.JSON(http.StatusCreated, album)
 
 }
