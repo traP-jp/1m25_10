@@ -71,33 +71,33 @@ const sampleImages: TestImage[] = [
   {
     id: '1',
     url: 'https://picsum.photos/400/400?random=1',
-    alt: 'ランダム画像1'
+    alt: 'ランダム画像1',
   },
   {
     id: '2',
     url: 'https://picsum.photos/400/400?random=2',
-    alt: 'ランダム画像2'
+    alt: 'ランダム画像2',
   },
   {
     id: '3',
     url: 'https://picsum.photos/400/400?random=3',
-    alt: 'ランダム画像3'
+    alt: 'ランダム画像3',
   },
   {
     id: '4',
     url: 'https://picsum.photos/400/400?random=4',
-    alt: 'ランダム画像4'
+    alt: 'ランダム画像4',
   },
   {
     id: '5',
     url: 'https://picsum.photos/400/400?random=5',
-    alt: 'ランダム画像5'
+    alt: 'ランダム画像5',
   },
   {
     id: '6',
     url: 'https://picsum.photos/400/400?random=6',
-    alt: 'ランダム画像6'
-  }
+    alt: 'ランダム画像6',
+  },
 ]
 
 // 様々なサイズ・タイプの画像
@@ -105,33 +105,33 @@ const variousImages: TestImage[] = [
   {
     id: 'landscape',
     url: 'https://picsum.photos/800/400?random=10',
-    alt: '横長画像'
+    alt: '横長画像',
   },
   {
     id: 'portrait',
     url: 'https://picsum.photos/400/800?random=11',
-    alt: '縦長画像'
+    alt: '縦長画像',
   },
   {
     id: 'square',
     url: 'https://picsum.photos/500/500?random=12',
-    alt: '正方形画像'
+    alt: '正方形画像',
   },
   {
     id: 'small',
     url: 'https://picsum.photos/200/200?random=13',
-    alt: '小さい画像'
+    alt: '小さい画像',
   },
   {
     id: 'large',
     url: 'https://picsum.photos/1200/1200?random=14',
-    alt: '大きい画像'
+    alt: '大きい画像',
   },
   {
     id: 'grayscale',
     url: 'https://picsum.photos/400/400?random=15&grayscale',
-    alt: 'グレースケール画像'
-  }
+    alt: 'グレースケール画像',
+  },
 ]
 
 // 壊れたURL（エラーハンドリングテスト用）
@@ -139,23 +139,23 @@ const brokenImages: TestImage[] = [
   {
     id: 'broken1',
     url: 'https://example.com/nonexistent-image.jpg',
-    alt: '存在しない画像1'
+    alt: '存在しない画像1',
   },
   {
     id: 'broken2',
     url: 'https://invalid-url/image.png',
-    alt: '無効なURL'
+    alt: '無効なURL',
   },
   {
     id: 'broken3',
     url: '/nonexistent-local-image.jpg',
-    alt: 'ローカルの存在しない画像'
+    alt: 'ローカルの存在しない画像',
   },
   {
     id: 'broken4',
     url: '',
-    alt: '空のURL'
-  }
+    alt: '空のURL',
+  },
 ]
 </script>
 

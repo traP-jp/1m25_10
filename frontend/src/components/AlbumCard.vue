@@ -1,7 +1,5 @@
 <template>
-  <div
-    :class="$style.albumCard"
-  >
+  <div :class="$style.albumCard">
     <div :class="$style.imageContainer">
       <div
         v-if="imageUrls && imageUrls.length > 0"
@@ -118,7 +116,7 @@ const formatDate = (dateString: string): string => {
   return date.toLocaleDateString('ja-JP', {
     year: 'numeric',
     month: 'short',
-    day: 'numeric'
+    day: 'numeric',
   })
 }
 </script>
