@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -243,7 +244,11 @@ func exchangeToken(code, codeVerifier string) (accessToken string, expiresIn int
 	if err != nil {
 		return "", 0, err
 	}
-	defer func() { _ = resp.Body.Close() }()
+	defer func() {
+		if cerr := resp.Body.Close(); cerr != nil {
+			log.Printf("warn: failed to close response body: %v", cerr)
+		}
+	}()
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		b, _ := io.ReadAll(resp.Body)
 		return "", 0, errors.New("token endpoint error (" + resp.Status + "): " + string(b))
@@ -268,7 +273,11 @@ func fetchTraqMe(token string) (*meResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer func() { _ = resp.Body.Close() }()
+	defer func() {
+		if cerr := resp.Body.Close(); cerr != nil {
+			log.Printf("warn: failed to close response body: %v", cerr)
+		}
+	}()
 	if resp.StatusCode != http.StatusOK {
 		b, _ := io.ReadAll(resp.Body)
 		return nil, errors.New("me error: " + string(b))
