@@ -63,7 +63,7 @@ func (h *Handler) AuthRequest(c echo.Context) error {
 	v.Set("state", state)
 	v.Set("code_challenge", codeChallenge)
 	v.Set("code_challenge_method", "S256")
-	// v.Set("scope", "read") // 必要に応じて
+	v.Set("scope", "read") // 必要なスコープを要求
 
 	authURL := authBase + "/authorize?" + v.Encode()
 	return c.Redirect(http.StatusFound, authURL)
