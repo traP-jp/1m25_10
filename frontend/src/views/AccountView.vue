@@ -46,7 +46,11 @@ onMounted(fetchMe)
 
 <template>
   <div class="container">
-    <h1>Account</h1>
+    <div style="display: flex; align-items: baseline; gap: 16px;">
+      <h1>OAuth</h1>
+      <p style="color: darkgray; margin: 0;">For debugging. Will require login at startup in the future.</p>
+    </div>
+
     <div v-if="loading">Loading...</div>
     <div v-else>
       <div v-if="me">
