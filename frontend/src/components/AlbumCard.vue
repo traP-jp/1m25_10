@@ -74,7 +74,7 @@ import { computed, ref, watch } from 'vue'
 interface Props {
   id: string
   title: string
-  description?: string // オプショナルに変更
+  description?: string
   imageUrls: string[]
   createdAt: string
   creator: {
@@ -153,7 +153,7 @@ const formatDate = (dateString: string): string => {
   user-select: none;
   display: flex;
   flex-direction: column;
-  height: 330px; /* 固定高さを設定 */
+  height: 330px;
 
   &:hover,
   &:focus-visible {
