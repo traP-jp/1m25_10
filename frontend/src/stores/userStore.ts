@@ -1,14 +1,9 @@
 import { defineStore } from 'pinia'
-
-type Me = {
-  id: string
-  name: string
-  displayName?: string
-} | null
+import type { Me } from '@/types/user'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
-    me: null as Me,
+  me: null as Me | null,
     loading: false as boolean,
   }),
   actions: {

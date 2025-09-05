@@ -1,11 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-
-type Me = {
-  id: string
-  name: string
-  displayName?: string
-}
+import type { Me } from '@/types/user'
 
 const me = ref<Me | null>(null)
 const loading = ref(true)
