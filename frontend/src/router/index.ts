@@ -35,6 +35,17 @@ const routes = [
     path: '/account',
     name: 'account',
     component: () => import('@/views/AccountView.vue'),
+  }
+  // テスト用ルート（一時的）
+  {
+    path: '/test/album-card',
+    name: 'albumCardTest',
+    component: () => import('@/views/AlbumCardTestView.vue'),
+  },
+  {
+    path: '/test/image-card',
+    name: 'imageCardTest',
+    component: () => import('@/views/ImageCardTestView.vue'),
   },
 ]
 
