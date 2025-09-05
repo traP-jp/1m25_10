@@ -1,6 +1,6 @@
 // axiosベースのAPIクライアント
 
-import axios, { type AxiosInstance, type AxiosResponse, AxiosError } from 'axios'
+import axios, { type AxiosInstance, type AxiosResponse } from 'axios'
 import type { ApiError } from '@/types'
 
 class ApiClient {
@@ -17,11 +17,11 @@ class ApiClient {
 
     // リクエストインターセプター
     this.client.interceptors.request.use(
-      (config) => {
+      (config: import('axios').InternalAxiosRequestConfig) => {
         // 必要に応じて認証トークンなどを追加
         return config
       },
-      (error) => {
+      (error: unknown) => {
         return Promise.reject(error)
       },
     )
@@ -31,7 +31,7 @@ class ApiClient {
       (response: AxiosResponse) => {
         return response
       },
-      (error: AxiosError<ApiError>) => {
+      (error: import('axios').AxiosError<ApiError>) => {
         if (error.response) {
           // サーバーからエラーレスポンスが返された場合
           const apiError: ApiError = {
