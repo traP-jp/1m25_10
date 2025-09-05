@@ -20,12 +20,6 @@ func Inject(db *sqlx.DB) *Server {
 		handler: h,
 	}
 }
-
-func (d *Server) SetupRoutes(g *echo.Group) {
-	// 既存のv1 API
-	d.handler.SetupRoutes(g)
-}
-
 // ルートレベルのセットアップ
 func (d *Server) SetupRoot(e *echo.Echo) {
 	// /api/auth
