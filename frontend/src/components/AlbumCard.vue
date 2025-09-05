@@ -11,13 +11,21 @@
           :key="`${imageUrl}-${index}`"
           :class="[$style.imageItem, $style[getImageItemClass(imageUrls.length, index)]]"
         >
-          <img
-            :src="imageUrl"
-            :alt="`Album ${title} image ${index + 1}`"
-            :class="$style.image"
-            @error="handleImageError"
-            loading="lazy"
-          />
+          <template v-if="!failedImageIndexes.has(index)">
+            <img
+              :src="imageUrl"
+              :alt="`Album ${title} image ${index + 1}`"
+              :class="$style.image"
+              @error="(e) => handleImageError(e, index)"
+              loading="lazy"
+            />
+          </template>
+          <template v-else>
+            <div :class="$style.placeholder" role="img" aria-label="Failed to load">
+              <div :class="$style.placeholderIcon" aria-hidden="true">❌</div>
+              <div :class="$style.placeholderText">Failed to load</div>
+            </div>
+          </template>
         </div>
         <!-- 画像が4枚より多い場合の残り枚数表示 -->
         <div
@@ -61,7 +69,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 interface Props {
   id: string
@@ -81,12 +89,16 @@ const props = defineProps<Props>()
 // 表示する画像（最大4枚）
 const displayImages = computed(() => props.imageUrls.slice(0, 4))
 
-// 画像読み込みエラー時の処理
-const handleImageError = (event: Event) => {
+// 読み込み失敗した画像のインデックス集合（displayImages基準）
+const failedImageIndexes = ref<Set<number>>(new Set())
+
+// 画像読み込みエラー時の処理（該当タイルのみエラープレースホルダーへ）
+const handleImageError = (event: Event, index: number) => {
   const img = event.target as HTMLImageElement
   if (img) {
-    img.src = '/dummyAlbumsIcon.png' // フォールバック画像
+    img.style.display = 'none'
   }
+  failedImageIndexes.value = new Set(failedImageIndexes.value).add(index)
 }
 
 // アバター読み込みエラー時の処理
@@ -109,6 +121,14 @@ const getImageItemClass = (totalImages: number, index: number): string => {
   }
   return 'quarter'
 }
+
+// props.imageUrls が変化したらエラー状態をリセット
+watch(
+  () => props.imageUrls,
+  () => {
+    failedImageIndexes.value = new Set()
+  },
+)
 
 // 日付をフォーマットする関数
 const formatDate = (dateString: string): string => {
@@ -192,6 +212,30 @@ const formatDate = (dateString: string): string => {
 .imageItem {
   position: relative;
   overflow: hidden;
+}
+
+// エラー時のプレースホルダ
+.placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: var(--Light-UI-Tertiary, #ced6db);
+  color: #666;
+}
+
+.placeholderIcon {
+  font-size: 48px;
+  margin-bottom: 8px;
+  opacity: 0.6;
+}
+
+.placeholderText {
+  font-size: 12px;
+  font-weight: 500;
+  opacity: 0.8;
 }
 
 .single {

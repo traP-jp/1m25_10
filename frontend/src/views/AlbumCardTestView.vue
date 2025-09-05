@@ -42,6 +42,13 @@
             :created-at="manyImagesAlbum.created_at"
             :creator="getCreatorData(manyImagesAlbum.creator)"
           />
+          <AlbumCard
+            :id="errorImageAlbum.id"
+            :title="errorImageAlbum.title"
+            :image-urls="getImageUrls(errorImageAlbum.images)"
+            :created-at="errorImageAlbum.created_at"
+            :creator="getCreatorData(errorImageAlbum.creator)"
+          />
         </div>
       </div>
     </div>
@@ -89,8 +96,14 @@ const getImageUrls = (imageIds: string[]): string[] => {
     // ランダムシードとしてidのハッシュ値を使用
     const seed = id.split('').reduce((a, b) => {
       a = (a << 5) - a + b.charCodeAt(0)
-      return a & 0xFFFFFFFF
+      return a & 0xffffffff
     }, 0)
+    // エッジケース用: idが"error-"で始まる場合、存在しないURLを返す
+    if (id.startsWith('error-')) {
+      // 存在しないホストを使って読み込みエラーを発生させる
+      return `https://this-domain-should-not-exist.example/${encodeURIComponent(id)}.jpg`
+    }
+
     return `https://picsum.photos/seed/${Math.abs(seed)}/400/400`
   })
 }
@@ -183,6 +196,16 @@ const manyImagesAlbum: Album = {
   images: Array.from({ length: 12 }, (_, i) => `many-img-${i + 1}`),
   created_at: '2025-08-30T20:00:00Z',
   updated_at: '2025-08-30T20:00:00Z',
+}
+
+const errorImageAlbum: Album = {
+  id: 'error-images',
+  title: '一部画像読み込みエラーが発生するアルバム',
+  description: '一部の画像URLが存在しない（読み込みエラー）ケースのテスト',
+  creator: 'user1',
+  images: ['error-broken-img-1', 'img-2', 'img-3', 'error-broken-img-4'],
+  created_at: '2025-09-05T12:00:00Z',
+  updated_at: '2025-09-05T12:00:00Z',
 }
 </script>
 
