@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/go-sql-driver/mysql"
 )
@@ -62,6 +63,26 @@ func ServerBaseURL() string {
 func FrontendBaseURL() string {
 	// 例: http://localhost:5173
 	return getEnv("FRONTEND_BASE_URL", "")
+}
+
+// CookieSecure returns whether cookies should be set with Secure=true.
+// Priority:
+//  1. If COOKIE_SECURE env
+//  2. Otherwise, infer from ServerBaseURL scheme (https => true)
+//  3. Default to false
+func CookieSecure() bool {
+	if v, ok := os.LookupEnv("COOKIE_SECURE"); ok {
+		switch strings.ToLower(strings.TrimSpace(v)) {
+		case "1", "true", "yes", "on":
+			return true
+		case "0", "false", "no", "off":
+			return false
+		}
+	}
+	if base := ServerBaseURL(); strings.HasPrefix(strings.ToLower(base), "https://") {
+		return true
+	}
+	return false
 }
 
 func MySQL() *mysql.Config {
