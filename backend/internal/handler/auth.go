@@ -25,7 +25,7 @@ const (
 	authBase          = "https://q.trap.jp/api/v3/oauth2"
 )
 
-// GET /api/v1/auth/request
+// GET /api/auth/request
 // query: callback (optional, relative path "/...")
 func (h *Handler) AuthRequest(c echo.Context) error {
 	clientID := config.TraqOAuthClientID()
@@ -62,7 +62,7 @@ func (h *Handler) AuthRequest(c echo.Context) error {
 	return c.Redirect(http.StatusFound, authURL)
 }
 
-// GET /api/v1/auth/callback?code=...&state=...
+// GET /api/auth/callback?code=...&state=...
 func (h *Handler) AuthCallback(c echo.Context) error {
 	code := c.QueryParam("code")
 	rstate := c.QueryParam("state")
@@ -106,7 +106,7 @@ func (h *Handler) AuthCallback(c echo.Context) error {
 	return c.Redirect(http.StatusFound, cb)
 }
 
-// GET /api/v1/auth/me
+// GET /api/auth/me
 func (h *Handler) AuthMe(c echo.Context) error {
 	token := getTokenFromCookie(c)
 	if token == "" {
@@ -120,7 +120,7 @@ func (h *Handler) AuthMe(c echo.Context) error {
 	return c.JSON(http.StatusOK, u)
 }
 
-// POST /api/v1/auth/logout
+// POST /api/auth/logout
 func (h *Handler) AuthLogout(c echo.Context) error {
 	delCookie(c, cookieTokenKey)
 	return c.NoContent(http.StatusNoContent)
