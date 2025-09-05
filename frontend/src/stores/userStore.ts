@@ -1,9 +1,13 @@
 import { defineStore } from 'pinia'
 import type { Me } from '@/types/user'
+import type { User } from '@/types'
+
+// 注意: 現在のOpenAPI仕様にはユーザー関連のエンドポイントが定義されていません
+// このStoreは将来の拡張のために保持していますが、現在は使用されていません
 
 export const useUserStore = defineStore('user', {
   state: () => ({
-  me: null as Me | null,
+    me: null as Me | null,
     loading: false as boolean,
   }),
   actions: {
