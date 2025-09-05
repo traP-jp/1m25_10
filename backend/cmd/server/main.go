@@ -28,9 +28,7 @@ func main() {
 	}()
 
 	s := server.Inject(db)
-
-	v1API := e.Group("/api/v1")
-	s.SetupRoutes(v1API)
+	s.SetupRoot(e)
 
 	e.Logger.Fatal(e.Start(config.AppAddr()))
 }

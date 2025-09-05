@@ -31,6 +31,11 @@ const routes = [
     name: 'saved',
     component: () => import('@/views/SavedView.vue'),
   },
+  {
+    path: '/account',
+    name: 'account',
+    component: () => import('@/views/AccountView.vue'),
+  },
 ]
 
 const router = createRouter({

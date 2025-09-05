@@ -5,6 +5,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
+    env_file:
+      - .env
     environment:
       NS_MARIADB_USER: ${NS_MARIADB_USER:-root}
       NS_MARIADB_PASSWORD: ${NS_MARIADB_PASSWORD:-pass}

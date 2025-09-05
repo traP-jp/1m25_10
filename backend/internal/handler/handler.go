@@ -38,3 +38,14 @@ func (h *Handler) SetupRoutes(api *echo.Group) {
 		albumAPI.GET("/:id", h.GetAlbum)
 	}
 }
+
+// SetupAuthRoutes は /api 直下にマウントされるAuth専用ルートを登録します。
+func (h *Handler) SetupAuthRoutes(api *echo.Group) {
+	authAPI := api.Group("/auth")
+	{
+		authAPI.GET("/request", h.AuthRequest)
+		authAPI.GET("/callback", h.AuthCallback)
+		authAPI.GET("/me", h.AuthMe)
+		authAPI.POST("/logout", h.AuthLogout)
+	}
+}
