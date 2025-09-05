@@ -21,11 +21,6 @@ export const useAlbumStore = defineStore('album', {
     // アルバム数
     albumCount: (state) => state.albums.length,
 
-    // 特定のユーザーのアルバム
-    albumsByCreator: (state) => {
-      return (creatorId: string) => state.albums.filter((album) => album.creator === creatorId)
-    },
-
     // キャッシュされたアルバム詳細を取得
     getAlbumDetail: (state) => {
       return (albumId: string) => state.albumDetails[albumId]
