@@ -89,9 +89,9 @@ const getImageUrls = (imageIds: string[]): string[] => {
     // ランダムシードとしてidのハッシュ値を使用
     const seed = id.split('').reduce((a, b) => {
       a = (a << 5) - a + b.charCodeAt(0)
-      return a & a
+      return a & 0xFFFFFFFF
     }, 0)
-    return `https://picsum.photos/400/400?random=${Math.abs(seed)}`
+    return `https://picsum.photos/seed/${Math.abs(seed)}/400/400`
   })
 }
 
