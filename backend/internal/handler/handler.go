@@ -7,10 +7,10 @@ import (
 )
 
 type Handler struct {
-	repo *repository.Repository
+	repo repository.Repository
 }
 
-func New(repo *repository.Repository) *Handler {
+func New(repo repository.Repository) *Handler {
 	return &Handler{
 		repo: repo,
 	}
@@ -29,5 +29,12 @@ func (h *Handler) SetupRoutes(api *echo.Group) {
 		userAPI.GET("", h.GetUsers)
 		userAPI.POST("", h.CreateUser)
 		userAPI.GET("/:userID", h.GetUser)
+	}
+
+	// album API
+	albumAPI := api.Group("/albums")
+	{
+		albumAPI.GET("", h.GetAlbums)
+		albumAPI.GET("/:id", h.GetAlbum)
 	}
 }
