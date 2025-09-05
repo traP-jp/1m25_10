@@ -35,8 +35,14 @@ func (h *Handler) AuthRequest(c echo.Context) error {
 	}
 
 	// state と code_verifier を生成
-	state := randString(32)
-	codeVerifier := randString(64)
+	state, err := randString(32)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to generate state").SetInternal(err)
+	}
+	codeVerifier, err := randString(64)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to generate code_verifier").SetInternal(err)
+	}
 	codeChallenge := s256(codeVerifier)
 
 	// 一時Cookieへ保存（短寿命）
@@ -127,19 +133,31 @@ func (h *Handler) AuthLogout(c echo.Context) error {
 }
 
 // ========== helpers ==========
-func randString(n int) string {
-	const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~"
-	b := make([]byte, n)
+func randString(n int) (string, error) {
+	// Base64URL (no padding) で、均一分布かつURLセーフな文字列を生成する。
+	// 望みの長さ n に対して、原始バイト長は ceil(n * 3 / 4)。不足時は切り詰める。
+	if n <= 0 {
+		return "", nil
+	}
+	bytesLen := (n*3 + 3) / 4
+	b := make([]byte, bytesLen)
 	if _, err := rand.Read(b); err != nil {
-		// フォールバック: 現実装では単純にゼロ値を返さないように
-		for i := range b {
-			b[i] = 'a'
-		}
+		return "", err
 	}
-	for i := range b {
-		b[i] = letters[int(b[i])%len(letters)]
+	s := base64.RawURLEncoding.EncodeToString(b)
+	if len(s) >= n {
+		return s[:n], nil
 	}
-	return string(b)
+	// 通常は発生しないが、不足した場合は追加生成して充足させる
+	extra := make([]byte, (n-len(s))*3/4+1)
+	if _, err := rand.Read(extra); err != nil {
+		return "", err
+	}
+	s += base64.RawURLEncoding.EncodeToString(extra)
+	if len(s) < n {
+		return "", errors.New("failed to generate enough random data")
+	}
+	return s[:n], nil
 }
 
 func s256(verifier string) string {
