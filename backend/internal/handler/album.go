@@ -105,7 +105,7 @@ func (h *Handler) PostAlbum(c echo.Context) error {
 	if !ok {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
 	}
-	creator = strings.TrimSpace(creator) //TODO: 削除 (Issue #110)
+	_ = creator //TODO: 削除 (Issue #110)
 
 	images := make([]uuid.UUID, 0, len(req.Images))
 	for _, s := range req.Images {
