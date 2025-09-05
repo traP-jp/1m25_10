@@ -52,7 +52,7 @@ onMounted(fetchMe)
     <div v-else>
       <div v-if="me">
         <p>
-          Logged in as: <strong>{{ me.name }}</strong>
+          Logged in as: <strong>{{ me.displayName }}</strong> (@{{ me.name }})
         </p>
         <button @click="logout">Logout</button>
       </div>
