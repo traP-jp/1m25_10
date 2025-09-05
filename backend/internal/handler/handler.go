@@ -39,13 +39,11 @@ func (h *Handler) SetupAppRoutes(api *echo.Group) {
 	}
 }
 
-// SetupAuthRoutes は /api 直下にマウントされるAuth専用ルートを登録します。
-func (h *Handler) SetupAuthRoutes(api *echo.Group) {
-	authAPI := api.Group("/auth")
-	{
-		authAPI.GET("/request", h.AuthRequest)
-		authAPI.GET("/callback", h.AuthCallback)
-		authAPI.GET("/me", h.AuthMe)
-		authAPI.POST("/logout", h.AuthLogout)
-	}
+// SetupAuthRoutes は `/api/auth` にマウントされる Auth 専用ルートを登録します。
+// 引数の `authGroup` は既に `/api/auth` のグループであることを想定します。
+func (h *Handler) SetupAuthRoutes(authGroup *echo.Group) {
+	authGroup.GET("/request", h.AuthRequest)
+	authGroup.GET("/callback", h.AuthCallback)
+	authGroup.GET("/me", h.AuthMe)
+	authGroup.POST("/logout", h.AuthLogout)
 }
