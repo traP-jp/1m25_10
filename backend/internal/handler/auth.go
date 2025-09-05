@@ -153,7 +153,7 @@ func setTempCookie(c echo.Context, name, val string, maxAge time.Duration) {
 		Value:    val,
 		Path:     "/",
 		HttpOnly: true,
-	Secure:   config.CookieSecure(),
+		Secure:   config.CookieSecure(),
 		SameSite: http.SameSiteLaxMode,
 		MaxAge:   int(maxAge / time.Second),
 	}
@@ -166,7 +166,7 @@ func setAuthCookie(c echo.Context, name, val string, maxAge time.Duration) {
 		Value:    val,
 		Path:     "/",
 		HttpOnly: true,
-	Secure:   config.CookieSecure(),
+		Secure:   config.CookieSecure(),
 		SameSite: http.SameSiteLaxMode,
 		MaxAge:   int(maxAge / time.Second),
 	}
@@ -179,7 +179,7 @@ func delCookie(c echo.Context, name string) {
 		Value:    "",
 		Path:     "/",
 		HttpOnly: true,
-	Secure:   config.CookieSecure(),
+		Secure:   config.CookieSecure(),
 		SameSite: http.SameSiteLaxMode,
 		MaxAge:   -1,
 		Expires:  time.Unix(0, 0),
@@ -225,7 +225,7 @@ func exchangeToken(code, codeVerifier string) (accessToken string, expiresIn int
 	if err != nil {
 		return "", 0, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		b, _ := io.ReadAll(resp.Body)
 		return "", 0, errors.New("token endpoint error (" + resp.Status + "): " + string(b))
@@ -250,7 +250,7 @@ func fetchTraqMe(token string) (*meResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode != http.StatusOK {
 		b, _ := io.ReadAll(resp.Body)
 		return nil, errors.New("me error: " + string(b))
