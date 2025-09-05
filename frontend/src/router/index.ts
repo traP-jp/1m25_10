@@ -31,6 +31,17 @@ const routes = [
     name: 'saved',
     component: () => import('@/views/SavedView.vue'),
   },
+  // テスト用ルート（一時的）
+  {
+    path: '/test/album-card',
+    name: 'albumCardTest',
+    component: () => import('@/views/AlbumCardTestView.vue'),
+  },
+  {
+    path: '/test/image-card',
+    name: 'imageCardTest',
+    component: () => import('@/views/ImageCardTestView.vue'),
+  },
 ]
 
 const router = createRouter({
