@@ -1,3 +1,421 @@
 <template>
-  <div>HomeView</div>
+  <div :class="$style.homeView">
+    <header :class="$style.header">
+      <div :class="$style.titleSection">
+        <h1 :class="$style.title">Home</h1>
+        <p :class="$style.subtitle">すべての画像 ({{ imageStore.imageCount }}枚)</p>
+      </div>
+
+      <!-- 検索・フィルタ -->
+      <div :class="$style.controls">
+        <div :class="$style.searchContainer">
+          <div :class="$style.searchInputWrapper">
+            <input
+              v-model="searchQuery"
+              type="text"
+              placeholder="画像を検索... (Enterで実行)"
+              :class="$style.searchInput"
+              @keyup.enter="performSearch"
+            />
+            <button
+              v-if="hasSearchQuery"
+              type="button"
+              @click="clearSearch"
+              :class="$style.clearSearchButton"
+              title="検索をクリア"
+            >
+              ×
+            </button>
+          </div>
+          <button
+            type="button"
+            @click="performSearch"
+            :class="$style.searchButton"
+            :disabled="imageStore.loading"
+          >
+            {{ imageStore.loading ? '検索中...' : '検索' }}
+          </button>
+        </div>
+
+        <!-- 選択された画像がある場合の操作ボタン -->
+        <div v-if="imageStore.selectedImageCount > 0" :class="$style.selectionActions">
+          <button
+            @click="imageStore.deselectAllImages"
+            :class="$style.clearSelectionButton"
+            title="選択を解除"
+          >
+            ×
+          </button>
+          <span :class="$style.selectionCount"> {{ imageStore.selectedImageCount }}枚選択中 </span>
+          <button @click="showCreateAlbumDialog" :class="$style.createAlbumButton">
+            アルバムを作成
+          </button>
+          <button @click="showAddToAlbumDialog" :class="$style.addToAlbumButton">
+            アルバムに追加
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- アルバム作成ダイアログ -->
+    <CreateAlbumDialog
+      :is-visible="showAlbumDialog"
+      :selected-image-count="imageStore.selectedImageCount"
+      @close="closeDialog"
+      @create="createAlbum"
+    />
+
+    <!-- アルバムに追加ダイアログ -->
+    <AddToAlbumDialog
+      :is-visible="showAddAlbumDialog"
+      :selected-image-count="imageStore.selectedImageCount"
+      @close="closeAddDialog"
+      @add-to-album="addToAlbum"
+    />
+
+    <!-- 画像一覧 -->
+    <ImageList
+      :images="images"
+      :loading="imageStore.loading"
+      :error="imageStore.error"
+      :selected-image-ids="imageStore.selectedImageIds"
+      :has-search-query="!!searchQuery"
+      :get-image-url="imageStore.getImageUrl"
+      @retry="retryLoad"
+      @toggle-selection="imageStore.toggleImageSelection"
+    />
+  </div>
 </template>
+
+<script setup lang="ts">
+import { computed, ref, onMounted } from 'vue'
+import { useImageStore } from '@/stores/imageStore'
+import { albumService } from '@/services'
+import ImageList from '@/components/ImageList.vue'
+import CreateAlbumDialog from '@/components/CreateAlbumDialog.vue'
+import AddToAlbumDialog from '@/components/AddToAlbumDialog.vue'
+
+const imageStore = useImageStore()
+
+// リアクティブなローカル状態
+const searchQuery = ref('')
+
+// 計算されたプロパティ（画像一覧）
+const images = computed(() => imageStore.images)
+
+// 検索クエリがあるかどうか
+const hasSearchQuery = computed(() => searchQuery.value.trim() !== '')
+
+// 検索の実行
+const performSearch = () => {
+  imageStore.fetchImages(searchQuery.value.trim() || undefined)
+}
+
+// 検索をクリア
+const clearSearch = () => {
+  searchQuery.value = ''
+  imageStore.fetchImages() // 全画像を再取得
+}
+
+// アルバム作成ダイアログの状態
+const showAlbumDialog = ref(false)
+
+// アルバムに追加ダイアログの状態
+const showAddAlbumDialog = ref(false)
+
+// アルバム作成ダイアログを表示
+const showCreateAlbumDialog = () => {
+  showAlbumDialog.value = true
+}
+
+// アルバムに追加ダイアログを表示
+const showAddToAlbumDialog = () => {
+  showAddAlbumDialog.value = true
+}
+
+// アルバム作成ダイアログを閉じる
+const closeDialog = () => {
+  showAlbumDialog.value = false
+}
+
+// アルバムに追加ダイアログを閉じる
+const closeAddDialog = () => {
+  showAddAlbumDialog.value = false
+}
+
+// アルバムを作成
+const createAlbum = async (data: { title: string; description: string }): Promise<void> => {
+  const result = await imageStore.createAlbumFromSelectedImages(
+    data.title,
+    data.description || undefined,
+  )
+
+  // 成功メッセージ（より良いUXのためにToastやNotificationを使うことも検討）
+  alert(`アルバム「${result.title}」を作成しました！（${result.imageCount}枚の画像）`)
+
+  closeDialog()
+}
+
+// アルバムに追加
+const addToAlbum = async (data: { albumId: string }): Promise<void> => {
+  try {
+    const selectedImageIds = Array.from(imageStore.selectedImageIds)
+
+    // 実際のAPIを呼び出し
+    const updatedAlbum = await albumService.addImagesToAlbum(data.albumId, selectedImageIds)
+
+    // 成功メッセージ
+    alert(`${selectedImageIds.length}枚の画像をアルバム「${updatedAlbum.title}」に追加しました！`)
+
+    // 選択を解除
+    imageStore.deselectAllImages()
+
+    closeAddDialog()
+  } catch (error) {
+    console.error('Failed to add to album:', error)
+    throw error // AddToAlbumDialog側でエラー表示
+  }
+}
+
+// 再試行
+const retryLoad = () => {
+  imageStore.clearError()
+  imageStore.fetchImages(searchQuery.value || undefined)
+}
+
+// コンポーネントマウント時に画像一覧を取得
+onMounted(() => {
+  imageStore.fetchImages()
+})
+</script>
+<style lang="scss" module>
+.homeView {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  background: #f8f9fa;
+  min-height: 100vh;
+}
+
+.header {
+  margin-bottom: 32px;
+}
+
+.titleSection {
+  margin-bottom: 20px;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: #666;
+  margin: 0;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  padding: 16px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.searchContainer {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.searchInputWrapper {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 8px 12px;
+  padding-right: 36px; // クリアボタンのスペースを確保
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+
+  &:focus {
+    outline: none;
+    border-color: #005bac;
+    box-shadow: 0 0 0 3px rgba(0, 91, 172, 0.1);
+  }
+}
+
+.clearSearchButton {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #666;
+  font-size: 18px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: #f0f0f0;
+    color: #333;
+  }
+
+  &:active {
+    background-color: #e0e0e0;
+  }
+}
+
+.searchButton {
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+
+  &:hover:not(:disabled) {
+    background-color: #0056b3;
+  }
+
+  &:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+  }
+}
+
+.selectionActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  background-color: #e3f2fd;
+  border-radius: 6px;
+  border: 1px solid #90caf9;
+}
+
+.clearSelectionButton {
+  background: none;
+  border: none;
+  color: #666;
+  font-size: 18px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: all 0.2s;
+  margin-right: -4px; // 選択数テキストとの間隔調整
+
+  &:hover {
+    background-color: #f0f0f0;
+    color: #333;
+  }
+
+  &:active {
+    background-color: #e0e0e0;
+  }
+}
+
+.selectionCount {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1565c0;
+}
+
+.createAlbumButton {
+  padding: 6px 12px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #0056b3;
+  }
+}
+
+.addToAlbumButton {
+  padding: 6px 12px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #218838;
+  }
+}
+
+// レスポンシブデザイン
+@media (max-width: 768px) {
+  .homeView {
+    padding: 16px;
+  }
+
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .searchContainer {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .selectionActions {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .controls {
+    padding: 12px;
+  }
+
+  .searchButton {
+    width: 100%;
+  }
+
+  .searchInput {
+    font-size: 16px; // iOS Safariでズームを防ぐ
+  }
+}
+</style>
