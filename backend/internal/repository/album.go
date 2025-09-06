@@ -31,7 +31,7 @@ type dbAlbum struct {
 	Id          uuid.UUID `db:"id"`
 	Title       string    `db:"title"`
 	Description string    `db:"description"`
-	Creator     uuid.UUID `db:"creator"`
+	Creator     string    `db:"creator"`
 	CreatedAt   time.Time `db:"created_at"`
 	UpdatedAt   time.Time `db:"updated_at"`
 }
@@ -39,7 +39,7 @@ type dbAlbum struct {
 type dbAlbumItem struct {
 	Id      uuid.UUID `db:"id"`
 	Title   string    `db:"title"`
-	Creator uuid.UUID `db:"creator"`
+	Creator string    `db:"creator"`
 }
 
 // GetAlbums retrieves albums based on the provided filter.
