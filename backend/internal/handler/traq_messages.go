@@ -284,9 +284,6 @@ func (h *Handler) GetTraqMessagesSearch(c echo.Context) error {
 	params.From = c.QueryParams()["from"]
 
 	body, status, err := h.searchTraqMessages(c, params)
-	if err != nil {
-		// traQのエラーをそのまま返す（検証用途）
-		return c.Blob(status, "application/json", body)
-	}
+	// traQのエラーをそのまま返す（検証用途）
 	return c.Blob(status, "application/json", body)
 }
