@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -128,4 +129,36 @@ func (h *Handler) PostAlbum(c echo.Context) error {
 	}
 	return c.JSON(http.StatusCreated, album)
 
+}
+
+// DELETE /api/v1/albums/:id
+func (h *Handler) DeleteAlbum(c echo.Context) error {
+	albumID, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid album ID")
+	}
+
+	deleter, ok := c.Get(middleware.UsernameKey).(string)
+	if !ok {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
+	}
+
+	album, err := h.repo.GetAlbum(c.Request().Context(), albumID)
+	if err != nil {
+		if errors.Is(err, domain.ErrNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, "Album not found")
+		}
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to retrieve album").SetInternal(err)
+	}
+
+	if err := h.repo.DeleteAlbum(c.Request().Context(), albumID); err != nil {
+		if errors.Is(err, domain.ErrNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, "Album not found")
+		}
+		if deleter != album.Creator {
+			return echo.NewHTTPError(http.StatusForbidden, "Forbidden")
+		}
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to delete album").SetInternal(err)
+	}
+	return c.NoContent(http.StatusNoContent)
 }
