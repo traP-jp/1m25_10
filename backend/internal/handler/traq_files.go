@@ -16,7 +16,7 @@ func (h *Handler) GetTraqFile(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "uuid is required")
 	}
 
-	// Cookieからtraql認証トークンを取得
+	// CookieからtraQ認証トークンを取得
 	token := getTokenFromCookie(c)
 	if token == "" {
 		return echo.NewHTTPError(http.StatusUnauthorized, "authentication required")
@@ -45,7 +45,7 @@ func (h *Handler) GetTraqFileThumbnail(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "uuid is required")
 	}
 
-	// Cookieからtraql認証トークンを取得
+	// CookieからtraQ認証トークンを取得
 	token := getTokenFromCookie(c)
 	if token == "" {
 		return echo.NewHTTPError(http.StatusUnauthorized, "authentication required")
@@ -72,15 +72,15 @@ func (h *Handler) proxyTraqFileRequest(url, token string) (*http.Response, error
 	if err != nil {
 		return nil, err
 	}
-	
-	// Authorizationヘッダーにtraqlトークンを設定
+
+	// AuthorizationヘッダーにtraQトークンを設定
 	req.Header.Set("Authorization", "Bearer "+token)
-	
+
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return resp, nil
 }
 
@@ -88,7 +88,7 @@ func (h *Handler) proxyTraqFileRequest(url, token string) (*http.Response, error
 func (h *Handler) proxyResponse(c echo.Context, resp *http.Response) error {
 	// ステータスコードを設定
 	c.Response().Status = resp.StatusCode
-	
+
 	// 重要なヘッダーをコピー
 	if contentType := resp.Header.Get("Content-Type"); contentType != "" {
 		c.Response().Header().Set("Content-Type", contentType)
@@ -105,7 +105,7 @@ func (h *Handler) proxyResponse(c echo.Context, resp *http.Response) error {
 	if lastModified := resp.Header.Get("Last-Modified"); lastModified != "" {
 		c.Response().Header().Set("Last-Modified", lastModified)
 	}
-	
+
 	// レスポンスボディをそのままコピー
 	// エラーレスポンスも含めて、すべてのレスポンスをそのまま転送
 	_, err := io.Copy(c.Response().Writer, resp.Body)
