@@ -76,7 +76,7 @@ func (h *Handler) proxyTraqFileRequest(url, token string) (*http.Response, error
 	// AuthorizationヘッダーにtraQトークンを設定
 	req.Header.Set("Authorization", "Bearer "+token)
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := h.client.Do(req)
 	if err != nil {
 		return nil, err
 	}

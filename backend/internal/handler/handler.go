@@ -1,18 +1,27 @@
 package handler
 
 import (
+	"net/http"
+
 	"github.com/traP-jp/1m25_10/backend/internal/repository"
 
 	"github.com/labstack/echo/v4"
 )
 
 type Handler struct {
-	repo repository.Repository
+	repo   repository.Repository
+	client *http.Client
 }
 
-func New(repo repository.Repository) *Handler {
+// New creates a Handler. If client is nil, http.DefaultClient will be used.
+func New(repo repository.Repository, client *http.Client) *Handler {
+	if client == nil {
+		client = http.DefaultClient
+	}
+
 	return &Handler{
-		repo: repo,
+		repo:   repo,
+		client: client,
 	}
 }
 
