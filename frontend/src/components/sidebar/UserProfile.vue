@@ -6,7 +6,7 @@
         <div :class="$style.avatar">
           <img
             v-if="userStore.me"
-            :src="`https://q.trap.jp/api/v3/public/icon/${userStore.me.name}`"
+            :src="userIconUrl"
             :alt="userStore.me.displayName || userStore.me.name"
             :class="$style.avatarImg"
             @error="avatarError = true"
@@ -77,6 +77,13 @@ const userStore = useUserStore()
 const avatarError = ref(false)
 
 const isLoggedIn = computed(() => userStore.me !== null)
+
+const userIconUrl = computed(() => {
+  if (userStore.me) {
+    return `https://q.trap.jp/api/v3/public/icon/${encodeURIComponent(userStore.me.name)}`
+  }
+  return ''
+})
 
 const userInitials = computed(() => {
   if (!userStore.me) return ''
