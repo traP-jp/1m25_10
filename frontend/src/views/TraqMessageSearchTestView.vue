@@ -169,7 +169,7 @@ const isLoggedIn = computed(() => userStore.me !== null)
 const userInfo = computed(() => userStore.me)
 
 function setExample() {
-  form.word = 'デバック用の写真。'
+  form.word = 'デバッグ用の写真。'
 }
 
 async function runSearch() {
