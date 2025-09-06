@@ -1,15 +1,27 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed } from 'vue'
 
 interface Props {
   url: string
   alt?: string
+  isSelected?: boolean
 }
-const props = defineProps<Props>()
-const isSelected = ref(false)
+
+interface Emits {
+  toggleSelection: []
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  isSelected: false,
+})
+
+const emit = defineEmits<Emits>()
+
+// 外部からの選択状態を優先し、内部状態は使わない
+const isSelected = computed(() => props.isSelected)
 
 const toggleSelection = () => {
-  isSelected.value = !isSelected.value
+  emit('toggleSelection')
 }
 </script>
 
