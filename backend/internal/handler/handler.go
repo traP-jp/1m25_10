@@ -47,3 +47,13 @@ func (h *Handler) SetupAuthRoutes(authGroup *echo.Group) {
 	authGroup.GET("/me", h.AuthMe)
 	authGroup.POST("/logout", h.AuthLogout)
 }
+
+// SetupTraqRoutes は `/api/v1/traq` にマウントされる traQ プロキシ専用ルートを登録します。
+// 引数の `traqGroup` は既に `/api/v1/traq` のグループであることを想定します。
+func (h *Handler) SetupTraqRoutes(traqGroup *echo.Group) {
+	filesGroup := traqGroup.Group("/files")
+	{
+		filesGroup.GET("/:uuid", h.GetTraqFile)
+		filesGroup.GET("/:uuid/thumbnail", h.GetTraqFileThumbnail)
+	}
+}

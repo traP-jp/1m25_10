@@ -144,6 +144,120 @@ paths:
         '500':
           $ref: '#/components/responses/ServerError'
 
+  /api/v1/traq/files/{uuid}:
+    get:
+      summary: traQファイル本体取得
+      description: traQ APIを経由してファイル本体を取得し、クライアントにプロキシします。ユーザーのtraQ認証トークンを使用してアクセス権限を検証します。
+      operationId: getTraqFile
+      tags:
+        - traQ Files
+      security:
+        - CookieAuth: []
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          description: traQファイルのUUID
+          schema:
+            type: string
+            format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440001"
+      responses:
+        '200':
+          description: ファイル本体
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/gif:
+              schema:
+                type: string
+                format: binary
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: 未認証
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: アクセス権限なし
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: ファイルが見つかりません
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/v1/traq/files/{uuid}/thumbnail:
+    get:
+      summary: traQファイルサムネイル取得
+      description: traQ APIを経由してファイルのサムネイル画像を取得し、クライアントにプロキシします。ユーザーのtraQ認証トークンを使用してアクセス権限を検証します。
+      operationId: getTraqFileThumbnail
+      tags:
+        - traQ Files
+      security:
+        - CookieAuth: []
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          description: traQファイルのUUID
+          schema:
+            type: string
+            format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440001"
+      responses:
+        '200':
+          description: サムネイル画像
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/gif:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: 未認証
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: アクセス権限なし
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: ファイルまたはサムネイルが見つかりません
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
   /images/{id}:
     get:
       summary: IDで画像詳細を取得
@@ -590,3 +704,5 @@ tags:
     description: アルバムに関する操作
   - name: Auth
     description: 認証に関する操作
+  - name: traQ Files
+    description: traQファイルプロキシに関する操作

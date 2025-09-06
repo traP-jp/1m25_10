@@ -33,4 +33,8 @@ func (d *Server) SetupRoot(e *echo.Echo) {
 	// /api/v1
 	v1Group := api.Group("/v1")
 	d.handler.SetupAppRoutes(v1Group)
+
+	// /api/v1/traq
+	traqGroup := v1Group.Group("/traq")
+	d.handler.SetupTraqRoutes(traqGroup)
 }
