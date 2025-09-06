@@ -42,6 +42,11 @@ const testSections = [
     description: 'traQ 画像検索のテスト - traQ /messages 検索を利用して画像UUIDを抽出',
     path: '/test/traq-image-search',
   },
+  {
+    title: 'OAuth Debug Test',
+    description: 'OAuth認証のデバッグテスト - ログイン状態の確認と認証機能のテスト',
+    path: '/test/oauth-debug',
+  },
 ]
 
 const navigateTo = (path: string) => {
