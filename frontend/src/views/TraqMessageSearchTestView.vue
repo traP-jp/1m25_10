@@ -235,7 +235,7 @@ async function runExtract() {
         query.append(k, String(v))
       }
     }
-    const url = `/api/v1/traq/messages?${query.toString()}`
+    const url = `/api/v1/images?${query.toString()}`
     const res = await fetch(url, { credentials: 'same-origin' })
     if (!res.ok) {
       const t = await res.text()
