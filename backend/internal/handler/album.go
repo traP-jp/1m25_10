@@ -125,7 +125,7 @@ func (h *Handler) PostAlbum(c echo.Context) error {
 
 	album, err := h.repo.PostAlbum(c.Request().Context(), params)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create album")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusCreated, album)
 
