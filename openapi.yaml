@@ -44,6 +44,220 @@ paths:
         '500':
           $ref: '#/components/responses/ServerError'
 
+  /api/auth/request:
+    get:
+      summary: traQ OAuth リクエスト
+      description: ブラウザをtraQの認可画面へリダイレクトします（サーバー側でstate/code_verifierを一時Cookieに保存）
+      operationId: authRequest
+      tags:
+        - Auth
+      parameters:
+        - name: callback
+          in: query
+          required: false
+          description: '認証後に戻る相対パス（例: "/account"）'
+          schema:
+            type: string
+      responses:
+        '302':
+          description: 認可サーバーへリダイレクト
+          headers:
+            Location:
+              description: traQ 認可エンドポイント
+              schema:
+                type: string
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/auth/callback:
+    get:
+      summary: traQ OAuth コールバック
+      description: 認可コードをアクセストークンに交換し、クッキーへ保存後にフロントへリダイレクト
+      operationId: authCallback
+      tags:
+        - Auth
+      parameters:
+        - name: code
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: state
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '302':
+          description: フロントエンドへリダイレクト（Set-Cookie でセッション用トークンを設定）
+          headers:
+            Location:
+              description: 'リダイレクト先（callback 指定があればそれ、なければ"/"）'
+              schema:
+                type: string
+        '400':
+          description: code/state が不正
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '502':
+          description: 認可サーバーとのトークン交換に失敗
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/auth/me:
+    get:
+      summary: ログイン中ユーザー情報
+      description: traQ の /users/me を代理取得した最小限のプロフィールを返します。
+      operationId: authMe
+      tags:
+        - Auth
+      security:
+        - CookieAuth: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Me'
+        '401':
+          description: 未認証
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/auth/logout:
+    post:
+      summary: ログアウト
+      description: セッションCookieを破棄します。
+      operationId: authLogout
+      tags:
+        - Auth
+      responses:
+        '204':
+          description: 成功（内容なし）
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/v1/traq/files/{uuid}:
+    get:
+      summary: traQファイル本体取得
+      description: traQ APIを経由してファイル本体を取得し、クライアントにプロキシします。ユーザーのtraQ認証トークンを使用してアクセス権限を検証します。
+      operationId: getTraqFile
+      tags:
+        - traQ Files
+      security:
+        - CookieAuth: []
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          description: traQファイルのUUID
+          schema:
+            type: string
+            format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440001"
+      responses:
+        '200':
+          description: ファイル本体
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/gif:
+              schema:
+                type: string
+                format: binary
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: 未認証
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: アクセス権限なし
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: ファイルが見つかりません
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/v1/traq/files/{uuid}/thumbnail:
+    get:
+      summary: traQファイルサムネイル取得
+      description: traQ APIを経由してファイルのサムネイル画像を取得し、クライアントにプロキシします。ユーザーのtraQ認証トークンを使用してアクセス権限を検証します。
+      operationId: getTraqFileThumbnail
+      tags:
+        - traQ Files
+      security:
+        - CookieAuth: []
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          description: traQファイルのUUID
+          schema:
+            type: string
+            format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440001"
+      responses:
+        '200':
+          description: サムネイル画像
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/gif:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: 未認証
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: アクセス権限なし
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: ファイルまたはサムネイルが見つかりません
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
   /images/{id}:
     get:
       summary: IDで画像詳細を取得
@@ -258,6 +472,24 @@ paths:
 
 components:
   schemas:
+    Me:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+          description: traQ のユーザーID
+          example: "01234567-89ab-cdef-0123-456789abcdef"
+        name:
+          type: string
+          description: traQ のユーザー名
+          example: "username"
+        displayName:
+          type: string
+          description: 表示名（未設定の場合は省略される）
+          example: "ユーザーネーム"
     Post:
       type: object
       required:
@@ -458,8 +690,19 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
 
+  securitySchemes:
+    CookieAuth:
+      type: apiKey
+      in: cookie
+      name: traq-auth-token
+      description: traQ OAuth 交換後にサーバーがセットするアクセストークン Cookie
+
 tags:
   - name: Images
     description: 画像に関する操作
   - name: Albums
     description: アルバムに関する操作
+  - name: Auth
+    description: 認証に関する操作
+  - name: traQ Files
+    description: traQファイルプロキシに関する操作

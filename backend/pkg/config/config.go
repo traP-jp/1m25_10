@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/go-sql-driver/mysql"
 )
@@ -37,6 +38,51 @@ func AppAddr() string {
 		return ":" + p
 	}
 	return ":8080"
+}
+
+// ========== traQ OAuth ==========
+func TraqOAuthClientID() string {
+	return getEnv("TRAQ_OAUTH_CLIENT_ID", "")
+}
+
+func TraqOAuthClientSecret() string {
+	return getEnv("TRAQ_OAUTH_CLIENT_SECRET", "")
+}
+
+func TraqOAuthRedirectURI() string {
+	// 例: http://localhost:8080/api/auth/callback
+	return getEnv("TRAQ_OAUTH_REDIRECT_URI", "")
+}
+
+// 開発/本番のベースURL
+func ServerBaseURL() string {
+	// 例: http://localhost:8080
+	return getEnv("SERVER_BASE_URL", "")
+}
+
+func FrontendBaseURL() string {
+	// 例: http://localhost:5173
+	return getEnv("FRONTEND_BASE_URL", "")
+}
+
+// CookieSecure returns whether cookies should be set with Secure=true.
+// Priority:
+//  1. If COOKIE_SECURE env
+//  2. Otherwise, infer from ServerBaseURL scheme (https => true)
+//  3. Default to false
+func CookieSecure() bool {
+	if v, ok := os.LookupEnv("COOKIE_SECURE"); ok {
+		switch strings.ToLower(strings.TrimSpace(v)) {
+		case "1", "true", "yes", "on":
+			return true
+		case "0", "false", "no", "off":
+			return false
+		}
+	}
+	if base := ServerBaseURL(); strings.HasPrefix(strings.ToLower(base), "https://") {
+		return true
+	}
+	return false
 }
 
 func MySQL() *mysql.Config {
