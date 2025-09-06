@@ -11,7 +11,7 @@ type Album struct {
 	Id          uuid.UUID
 	Title       string
 	Description string
-	Creator     uuid.UUID
+	Creator     string
 	Images      []uuid.UUID
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
@@ -21,12 +21,12 @@ type Album struct {
 type AlbumItem struct {
 	Id      uuid.UUID
 	Title   string
-	Creator uuid.UUID
+	Creator string
 }
 
 // AlbumFilter represents filtering criteria for albums
 type AlbumFilter struct {
-	CreatorID  *uuid.UUID
+	CreatorID  *string
 	BeforeDate *time.Time // Filter by created_at
 	AfterDate  *time.Time // Filter by created_at
 	Limit      *int
@@ -38,7 +38,7 @@ type AlbumFilter struct {
 type PostAlbumParams struct {
 	Title       string
 	Description string
-	Creator     uuid.UUID
+	Creator     string
 	Images      []uuid.UUID
 }
 

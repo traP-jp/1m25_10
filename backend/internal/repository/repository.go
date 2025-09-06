@@ -6,7 +6,6 @@ import (
 
 type Repository interface {
 	AlbumRepository
-	UserRepository
 }
 
 type sqlRepositoryImpl struct {
