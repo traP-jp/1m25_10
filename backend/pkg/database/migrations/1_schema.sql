@@ -1,7 +1,3 @@
 -- +goose Up
-CREATE TABLE IF NOT EXISTS users (
-	id VARCHAR(36) NOT NULL,
-	name VARCHAR(255) NOT NULL,
-	email VARCHAR(255) NOT NULL,
-	PRIMARY KEY (id)
-);
+-- Users table removed as authentication is handled via X-Forwarded-User header
+-- User information will be retrieved directly from traQ API when needed
