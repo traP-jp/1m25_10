@@ -107,9 +107,7 @@
               <code>GET /api/v1/traq/messages</code> - traQ message search proxy (all traQ query
               params supported)
             </li>
-            <li>
-              Optionally filter by stamp: <code>?stampId=&lt;uuid&gt;</code>
-            </li>
+            <li>Optionally filter by stamp: <code>?stampId=&lt;uuid&gt;</code></li>
             <li>
               <code>GET /api/v1/images</code> - search with hasImage=true and extract image UUIDs
               from message content
