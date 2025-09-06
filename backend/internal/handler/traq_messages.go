@@ -283,7 +283,7 @@ func (h *Handler) GetTraqMessagesSearch(c echo.Context) error {
 	params.To = c.QueryParams()["to"]
 	params.From = c.QueryParams()["from"]
 
-	body, status, err := h.searchTraqMessages(c, params)
-	// traQのエラーをそのまま返す（検証用途）
+	// traQのエラーはそのまま返す（検証用途）
+	body, status, _ := h.searchTraqMessages(c, params)
 	return c.Blob(status, "application/json", body)
 }
