@@ -1,5 +1,5 @@
 import { apiClient } from './apiClient'
-import type { Image, ImageDetail, GetImagesParams } from '@/types'
+import type { Image, ImageDetail, GetImagesParams, GetImagesResponse } from '@/types'
 
 export class ImageService {
   // 全画像取得（GET /images）
@@ -18,7 +18,12 @@ export class ImageService {
       queryParams.offset = offset
     }
 
-    return apiClient.get<Image[]>('/images', queryParams as Record<string, unknown>)
+    const response = await apiClient.get<GetImagesResponse>(
+      '/images',
+      queryParams as Record<string, unknown>,
+    )
+    // 画像IDから基本的なImage型に変換
+    return response.hits.map((id) => ({ id }))
   }
 
   // 特定の画像詳細取得（GET /images/{id}）

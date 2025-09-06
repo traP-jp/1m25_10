@@ -26,9 +26,6 @@ export const useImageStore = defineStore('image', {
     selectedImages: (state) => {
       return state.images.filter((image) => state.selectedImageIds.has(image.id))
     },
-    imagesByCreator: (state) => {
-      return (creatorId: string) => state.images.filter((image) => image.creator === creatorId)
-    },
     getImageDetail: (state) => {
       return (imageId: string) => state.imageDetails[imageId]
     },
@@ -99,7 +96,18 @@ export const useImageStore = defineStore('image', {
       }
     },
 
-    async fetchImageDetail(imageId: string) {
+    // 画像詳細を取得（必要な時のみ）
+    async fetchImageDetailIfNeeded(imageId: string): Promise<ImageDetail> {
+      // 既にキャッシュされている場合はそれを返す
+      if (this.imageDetails[imageId]) {
+        return this.imageDetails[imageId]
+      }
+
+      // キャッシュされていない場合は取得
+      return this.fetchImageDetail(imageId)
+    },
+
+    async fetchImageDetail(imageId: string): Promise<ImageDetail> {
       this.loading = true
       this.error = null
 
