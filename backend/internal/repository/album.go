@@ -127,6 +127,8 @@ func (r *sqlRepositoryImpl) PostAlbum(ctx context.Context, params domain.PostAlb
 				if err != nil {
 					return nil, err
 				}
+			} else {
+				return nil, err
 			}
 		}
 		newAlbumImage := AlbumImage{
