@@ -17,7 +17,7 @@ paths:
   /images:
     get:
       summary: 全ての画像を取得
-      description: 全ての画像の詳細情報を配列で返します
+      description: 全ての画像のUUID配列を返します
       operationId: getImages
       tags:
         - Images
@@ -29,18 +29,11 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Image'
+                  type: string
+                  format: uuid
               example:
-                - id: "0198cffa-4228-7afe-ac39-e0c88a0f0b81"
-                  creator: "019619d0-e53a-7be9-add3-5096a746a93d"
-                  post:
-                    id: "0198cffa-42a2-7afe-b478-c11c146a2332"
-                    content: "かわいい"
-                - id: "01987e0e-bd1d-711f-ad98-1b37e53a6cd3"
-                  creator: "019619d0-e53a-7be9-add3-5096a746a93d"
-                  post:
-                    id: "01987e0e-bddd-711f-be8a-991b87acaf08"
-                    content: ":think-nya:"
+                - "0198cffa-4228-7afe-ac39-e0c88a0f0b81"
+                - "01987e0e-bd1d-711f-ad98-1b37e53a6cd3"
         '500':
           $ref: '#/components/responses/ServerError'
 
