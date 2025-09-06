@@ -37,6 +37,11 @@ const testSections = [
     description: 'traQ File Proxy Testのテスト - ファイルの読み込みと表示の確認',
     path: '/test/traq-file',
   },
+  {
+    title: 'OAuth Debug Test',
+    description: 'OAuth認証のデバッグテスト - ログイン状態の確認と認証機能のテスト',
+    path: '/test/oauth-debug',
+  },
 ]
 
 const navigateTo = (path: string) => {
