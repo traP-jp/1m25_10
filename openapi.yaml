@@ -356,6 +356,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/schemas/Error'
         '403':
           description: 権限がありません
           content:
@@ -425,6 +427,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/schemas/Error'
         '403':
           description: 権限がありません
           content:
@@ -452,6 +456,8 @@ paths:
       responses:
         '204':
           description: アルバムが正常に削除されました
+        '401':
+          $ref: '#/components/schemas/Error'
         '403':
           description: 権限がありません
           content:
@@ -678,6 +684,18 @@ components:
     
     ServerError:
       description: 内部サーバーエラー
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    
+    Unauthorized:
+      description: 認証に失敗しました。認証情報が提供されていないか無効です。
+      headers:
+        WWW-Authenticate:
+          description: 'クライアントに通知する認証方式とオプションのエラー情報（例: Bearer realm="api", error="invalid_token"）'
+          schema:
+            type: string
       content:
         application/json:
           schema:
