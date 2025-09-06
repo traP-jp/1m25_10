@@ -3,7 +3,12 @@
     <div class="container">
       <h1>Test</h1>
 
-      <div v-for="section in testSections" :key="section.path" class="test-section" @click="navigateTo(section.path)">
+      <div
+        v-for="section in testSections"
+        :key="section.path"
+        class="test-section"
+        @click="navigateTo(section.path)"
+      >
         <h2>{{ section.title }}</h2>
         <p>{{ section.description }}</p>
       </div>
@@ -17,9 +22,21 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 
 const testSections = [
-  { title: 'Album Card Test', description: 'AlbumCardコンポーネントの表示テスト - サンプルアルバムとエッジケースの確認', path: '/test/album-card' },
-  { title: 'Image Card Test', description: 'ImageCardコンポーネントの表示テスト - 画像の読み込みと表示の確認', path: '/test/image-card' },
-  { title: 'traQ File Proxy Test', description: 'traQ File Proxy Testのテスト - ファイルの読み込みと表示の確認', path: '/test/traq-file' }
+  {
+    title: 'Album Card Test',
+    description: 'AlbumCardコンポーネントの表示テスト - サンプルアルバムとエッジケースの確認',
+    path: '/test/album-card',
+  },
+  {
+    title: 'Image Card Test',
+    description: 'ImageCardコンポーネントの表示テスト - 画像の読み込みと表示の確認',
+    path: '/test/image-card',
+  },
+  {
+    title: 'traQ File Proxy Test',
+    description: 'traQ File Proxy Testのテスト - ファイルの読み込みと表示の確認',
+    path: '/test/traq-file',
+  },
 ]
 
 const navigateTo = (path: string) => {
