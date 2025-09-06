@@ -14,7 +14,7 @@
         v-for="image in images"
         :key="image.id"
         :url="getImageUrl(image)"
-        :alt="image.post.content"
+        alt=""
         :is-selected="isImageSelected(image.id)"
         @toggle-selection="() => $emit('toggleSelection', image.id)"
       />
