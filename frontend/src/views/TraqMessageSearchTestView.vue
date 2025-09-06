@@ -21,6 +21,10 @@
             <input v-model="form.word" placeholder="例: テスト" />
           </label>
           <label>
+            stampId (uuid)
+            <input v-model="form.stampId" placeholder="bd6c..." />
+          </label>
+          <label>
             after (RFC3339)
             <input v-model="form.after" placeholder="2025-01-01T00:00:00Z" />
           </label>
@@ -104,6 +108,9 @@
               params supported)
             </li>
             <li>
+              Optionally filter by stamp: <code>?stampId=&lt;uuid&gt;</code>
+            </li>
+            <li>
               <code>GET /api/v1/images</code> - search with hasImage=true and extract image UUIDs
               from message content
             </li>
@@ -111,6 +118,8 @@
           <h3>Usage in Frontend:</h3>
           <pre><code>// search
 fetch('/api/v1/traq/messages?word=テスト', { credentials: 'same-origin' })
+// with stamp filter
+fetch('/api/v1/traq/messages?word=テスト&stampId=bd6cdc20-1ee8-4072-a37a-1e48f1e549c0', { credentials: 'same-origin' })
 // extract images
 fetch('/api/v1/images?word=テスト', { credentials: 'same-origin' })
 </code></pre>
@@ -140,6 +149,7 @@ const userStore = useUserStore()
 
 const form = reactive<TraqMessageSearchParams>({
   word: '',
+  stampId: '',
   after: '',
   before: '',
   in: '',
