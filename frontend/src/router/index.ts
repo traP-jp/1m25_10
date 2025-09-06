@@ -57,6 +57,11 @@ const routes = [
     name: 'traqFileTest',
     component: () => import('@/views/TraqFileTestView.vue'),
   },
+  {
+    path: '/test/traq-message-search',
+    name: 'traqMessageSearchTest',
+    component: () => import('@/views/TraqMessageSearchTestView.vue'),
+  },
 ]
 
 const router = createRouter({

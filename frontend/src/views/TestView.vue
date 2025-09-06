@@ -37,6 +37,11 @@ const testSections = [
     description: 'traQ File Proxy Testのテスト - ファイルの読み込みと表示の確認',
     path: '/test/traq-file',
   },
+  {
+    title: 'traQ Message Search Test',
+    description: 'traQ /messages 検索の透過呼び出しを試すデバッグページ',
+    path: '/test/traq-message-search',
+  },
 ]
 
 const navigateTo = (path: string) => {

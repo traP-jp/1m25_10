@@ -2,7 +2,7 @@ package handler
 
 import (
 	"net/http"
-  
+
 	"github.com/traP-jp/1m25_10/backend/internal/handler/middleware"
 
 	"github.com/traP-jp/1m25_10/backend/internal/repository"
@@ -60,4 +60,7 @@ func (h *Handler) SetupTraqRoutes(traqGroup *echo.Group) {
 		filesGroup.GET("/:uuid", h.GetTraqFile)
 		filesGroup.GET("/:uuid/thumbnail", h.GetTraqFileThumbnail)
 	}
+	// debug messages search
+	traqGroup.GET("/messages/search", h.DebugTraqMessagesSearch)
+	traqGroup.GET("/messages/search_images", h.DebugTraqMessagesSearchImages)
 }
