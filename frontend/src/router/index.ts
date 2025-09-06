@@ -47,6 +47,11 @@ const routes = [
     name: 'imageCardTest',
     component: () => import('@/views/ImageCardTestView.vue'),
   },
+  {
+    path: '/test/traq-file',
+    name: 'traqFileTest',
+    component: () => import('@/views/TraqFileTestView.vue'),
+  },
 ]
 
 const router = createRouter({

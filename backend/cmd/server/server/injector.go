@@ -1,6 +1,9 @@
 package server
 
 import (
+	"net/http"
+	"time"
+
 	"github.com/traP-jp/1m25_10/backend/internal/handler"
 	"github.com/traP-jp/1m25_10/backend/internal/repository"
 
@@ -14,7 +17,13 @@ type Server struct {
 
 func Inject(db *sqlx.DB) *Server {
 	repo := repository.New(db)
-	h := handler.New(repo)
+
+	// Create an HTTP client with a reasonable timeout for external calls
+	client := &http.Client{
+		Timeout: 15 * time.Second,
+	}
+
+	h := handler.New(repo, client)
 
 	return &Server{
 		handler: h,
@@ -33,4 +42,8 @@ func (d *Server) SetupRoot(e *echo.Echo) {
 	// /api/v1
 	v1Group := api.Group("/v1")
 	d.handler.SetupAppRoutes(v1Group)
+
+	// /api/v1/traq
+	traqGroup := v1Group.Group("/traq")
+	d.handler.SetupTraqRoutes(traqGroup)
 }
