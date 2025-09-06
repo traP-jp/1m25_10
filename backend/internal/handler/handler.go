@@ -41,6 +41,13 @@ func (h *Handler) SetupAppRoutes(api *echo.Group) {
 		albumAPI.GET("/:id", h.GetAlbum)
 		albumAPI.POST("", h.PostAlbum, middleware.UsernameProvider)
 	}
+
+	// images API
+	imagesAPI := api.Group("/images")
+	{
+		imagesAPI.GET("", h.GetTraqMessagesSearchImages)
+	}
+
 }
 
 // SetupAuthRoutes は `/api/auth` にマウントされる Auth 専用ルートを登録します。
@@ -60,7 +67,6 @@ func (h *Handler) SetupTraqRoutes(traqGroup *echo.Group) {
 		filesGroup.GET("/:uuid", h.GetTraqFile)
 		filesGroup.GET("/:uuid/thumbnail", h.GetTraqFileThumbnail)
 	}
-	// debug messages search
-	traqGroup.GET("/messages/search", h.DebugTraqMessagesSearch)
-	traqGroup.GET("/messages/search_images", h.DebugTraqMessagesSearchImages)
+	// messages search endpoints
+	traqGroup.GET("/messages", h.GetTraqMessagesSearch)
 }

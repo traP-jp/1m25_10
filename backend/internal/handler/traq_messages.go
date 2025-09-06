@@ -13,7 +13,6 @@ import (
 )
 
 // traqMessageSearchParams は traQ /api/v3/messages のクエリに対応する内部用パラメータです。
-// まだ外部公開の予定がないため非公開型にしています。
 type traqMessageSearchParams struct {
 	Word           string
 	After          string // RFC3339想定 (serverはバリデーションしない)
@@ -141,7 +140,7 @@ type traqMessagesRawResponse struct {
 
 var fileUUIDRe = regexp.MustCompile(`https?://q\.trap\.jp/files/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})`)
 
-// extractUUIDsFromContent はメッセージ本文からファイルUUIDを全件抽出する
+// メッセージ本文からファイルUUIDを全件抽出する
 func extractUUIDsFromContent(content string) []string {
 	matches := fileUUIDRe.FindAllStringSubmatch(content, -1)
 	if len(matches) == 0 {
@@ -156,8 +155,7 @@ func extractUUIDsFromContent(content string) []string {
 	return res
 }
 
-// searchTraqImagesUUIDs は hasImage=true 固定で traQ 検索を行い、
-// totalHits と content から抽出した画像UUIDの配列を返す。
+// hasImage=true 固定で traQ 検索を行い、totalHits と content から抽出した画像UUIDの配列を返す。
 func (h *Handler) searchTraqImagesUUIDs(c echo.Context, p *traqMessageSearchParams) (int, []string, error) {
 	// callerからのHasImage指定は無視してtrue固定
 	has := true
@@ -190,9 +188,8 @@ func (h *Handler) searchTraqImagesUUIDs(c echo.Context, p *traqMessageSearchPara
 	return raw.TotalHits, uuids, nil
 }
 
-// DebugTraqMessagesSearchImages はデバッグ用エンドポイント。traQ検索を行い、
-// totalHits と抽出した画像UUID配列を返す。
-func (h *Handler) DebugTraqMessagesSearchImages(c echo.Context) error {
+// traQ検索を行い、totalHits と抽出した画像UUID配列を返す。
+func (h *Handler) GetTraqMessagesSearchImages(c echo.Context) error {
 	params := &traqMessageSearchParams{
 		Word:     c.QueryParam("word"),
 		After:    c.QueryParam("after"),
@@ -231,9 +228,8 @@ func (h *Handler) DebugTraqMessagesSearchImages(c echo.Context) error {
 	return c.JSON(http.StatusOK, out)
 }
 
-// 以下は開発・デバッグ用の透過プロキシエンドポイント。
-// 後で削除しても良い。/api/v1/traq/messages/search?word=... などで利用。
-func (h *Handler) DebugTraqMessagesSearch(c echo.Context) error {
+// 透過プロキシエンドポイント。
+func (h *Handler) GetTraqMessagesSearch(c echo.Context) error {
 	// クエリを構築
 	params := &traqMessageSearchParams{
 		Word:     c.QueryParam("word"),

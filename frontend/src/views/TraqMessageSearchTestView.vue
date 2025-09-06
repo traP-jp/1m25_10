@@ -101,19 +101,19 @@
           <h3>Message Endpoints:</h3>
           <ul>
             <li>
-              <code>GET /api/v1/traq/messages/search</code> - traQ message search proxy (all traQ
-              query params supported)
+              <code>GET /api/v1/traq/messages</code> - traQ message search proxy (all traQ query
+              params supported)
             </li>
             <li>
-              <code>GET /api/v1/traq/messages/search_images</code> - Debug: search with
-              hasImage=true and extract image UUIDs from message content
+              <code>GET /api/v1/images</code> - search with hasImage=true and extract image UUIDs
+              from message content
             </li>
           </ul>
           <h3>Usage in Frontend:</h3>
           <pre><code>// search
-fetch('/api/v1/traq/messages/search?word=テスト', { credentials: 'same-origin' })
+fetch('/api/v1/traq/messages?word=テスト', { credentials: 'same-origin' })
 // extract images
-fetch('/api/v1/traq/messages/search_images?word=テスト', { credentials: 'same-origin' })
+fetch('/api/v1/images?word=テスト', { credentials: 'same-origin' })
 </code></pre>
         </div>
       </div>
@@ -236,7 +236,7 @@ async function runExtract() {
         query.append(k, String(v))
       }
     }
-    const url = `/api/v1/traq/messages/search_images?${query.toString()}`
+    const url = `/api/v1/traq/messages?${query.toString()}`
     const res = await fetch(url, { credentials: 'same-origin' })
     if (!res.ok) {
       const t = await res.text()

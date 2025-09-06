@@ -32,10 +32,10 @@ function buildQuery(params: Record<string, unknown>): string {
   return u.toString()
 }
 
-// テスト用途では明示的に /api/v1/traq/messages/search を叩く
+// テスト用途では明示的に /api/v1/traq/messages を叩く
 export async function searchTraqMessages(params: TraqMessageSearchParams): Promise<unknown> {
   const query = buildQuery(params as Record<string, unknown>)
-  const url = `/api/v1/traq/messages/search${query ? `?${query}` : ''}`
+  const url = `/api/v1/traq/messages${query ? `?${query}` : ''}`
 
   // 既存の apiClient を経由する必要があれば差し替え可能だが、ここでは直接 fetch
   const res = await fetch(url, { credentials: 'same-origin' })
