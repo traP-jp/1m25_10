@@ -37,6 +37,16 @@ const testSections = [
     description: 'traQ File Proxy Testのテスト - ファイルの読み込みと表示の確認',
     path: '/test/traq-file',
   },
+  {
+    title: 'traQ Image Search Test',
+    description: 'traQ 画像検索のテスト - traQ /messages 検索を利用して画像UUIDを抽出',
+    path: '/test/traq-image-search',
+  },
+  {
+    title: 'OAuth Debug Test',
+    description: 'OAuth認証のデバッグテスト - ログイン状態の確認と認証機能のテスト',
+    path: '/test/oauth-debug',
+  },
 ]
 
 const navigateTo = (path: string) => {

@@ -31,11 +31,6 @@ const routes = [
     name: 'saved',
     component: () => import('@/views/SavedView.vue'),
   },
-  {
-    path: '/account',
-    name: 'account',
-    component: () => import('@/views/AccountView.vue'),
-  },
   // テスト用ルート（一時的）
   {
     path: '/test',
@@ -56,6 +51,16 @@ const routes = [
     path: '/test/traq-file',
     name: 'traqFileTest',
     component: () => import('@/views/TraqFileTestView.vue'),
+  },
+  {
+    path: '/test/traq-image-search',
+    name: 'traqImageSearchTest',
+    component: () => import('@/views/TraqMessageSearchTestView.vue'),
+  },
+  {
+    path: '/test/oauth-debug',
+    name: 'oauthDebugTest',
+    component: () => import('@/views/OAuthDebugTestView.vue'),
   },
 ]
 
