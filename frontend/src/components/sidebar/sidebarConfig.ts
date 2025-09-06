@@ -9,4 +9,5 @@ export const sidebarItems: SidebarItem[] = [
   { title: 'Albums', icon: '/dummyAlbumsIcon.png', path: '/albums' },
   { title: 'Saved', icon: '/dummySavedIcon.png', path: '/saved' },
   { title: 'Account', path: '/account' },
+  { title: 'Test', path: '/test' },
 ]
