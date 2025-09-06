@@ -16,14 +16,10 @@ import (
 
 // GET /api/v1/albums
 func (h *Handler) GetAlbums(c echo.Context) error {
-	creatorIdStr := c.QueryParam("creator_id")
-	var creatorId *uuid.UUID
+	creatorIdStr := c.QueryParam("creator")
+	var creatorId *string
 	if creatorIdStr != "" {
-		creatorIdParsed, err := uuid.Parse(creatorIdStr)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, "Invalid creator ID")
-		}
-		creatorId = &creatorIdParsed
+		creatorId = &creatorIdStr
 	}
 	beforeDateStr := c.QueryParam("before_date")
 	var beforeDate *time.Time
@@ -105,7 +101,6 @@ func (h *Handler) PostAlbum(c echo.Context) error {
 	if !ok {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
 	}
-	_ = creator //TODO: 削除 (Issue #110)
 
 	images := make([]uuid.UUID, 0, len(req.Images))
 	for _, s := range req.Images {
@@ -123,7 +118,7 @@ func (h *Handler) PostAlbum(c echo.Context) error {
 	params := domain.PostAlbumParams{
 		Title:       req.Title,
 		Description: req.Description,
-		Creator:     uuid.New(), // TODO: creatorに変更 (Issue #110)
+		Creator:     creator,
 		Images:      images,
 	}
 

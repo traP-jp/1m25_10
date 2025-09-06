@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"github.com/traP-jp/1m25_10/backend/internal/handler/middleware"
 	"github.com/traP-jp/1m25_10/backend/internal/repository"
 
 	"github.com/labstack/echo/v4"
@@ -23,18 +24,11 @@ func (h *Handler) SetupRoutes(api *echo.Group) {
 		pingAPI.GET("", h.Ping)
 	}
 
-	// user API
-	userAPI := api.Group("/users")
-	{
-		userAPI.GET("", h.GetUsers)
-		userAPI.POST("", h.CreateUser)
-		userAPI.GET("/:userID", h.GetUser)
-	}
-
 	// album API
 	albumAPI := api.Group("/albums")
 	{
 		albumAPI.GET("", h.GetAlbums)
 		albumAPI.GET("/:id", h.GetAlbum)
+		albumAPI.POST("", h.PostAlbum, middleware.UsernameProvider)
 	}
 }
