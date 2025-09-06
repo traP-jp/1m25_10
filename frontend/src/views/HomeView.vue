@@ -97,93 +97,67 @@ import AddToAlbumDialog from '@/components/AddToAlbumDialog.vue'
 
 const imageStore = useImageStore()
 
-// リアクティブなローカル状態
 const searchQuery = ref('')
-
-// 計算されたプロパティ（画像一覧）
 const images = computed(() => imageStore.images)
-
-// 検索クエリがあるかどうか
 const hasSearchQuery = computed(() => searchQuery.value.trim() !== '')
 
-// 検索の実行
 const performSearch = () => {
   imageStore.fetchImages(searchQuery.value.trim() || undefined)
 }
 
-// 検索をクリア
 const clearSearch = () => {
   searchQuery.value = ''
-  imageStore.fetchImages() // 全画像を再取得
+  imageStore.fetchImages()
 }
 
-// アルバム作成ダイアログの状態
 const showAlbumDialog = ref(false)
-
-// アルバムに追加ダイアログの状態
 const showAddAlbumDialog = ref(false)
 
-// アルバム作成ダイアログを表示
 const showCreateAlbumDialog = () => {
   showAlbumDialog.value = true
 }
 
-// アルバムに追加ダイアログを表示
 const showAddToAlbumDialog = () => {
   showAddAlbumDialog.value = true
 }
 
-// アルバム作成ダイアログを閉じる
 const closeDialog = () => {
   showAlbumDialog.value = false
 }
 
-// アルバムに追加ダイアログを閉じる
 const closeAddDialog = () => {
   showAddAlbumDialog.value = false
 }
 
-// アルバムを作成
 const createAlbum = async (data: { title: string; description: string }): Promise<void> => {
   const result = await imageStore.createAlbumFromSelectedImages(
     data.title,
     data.description || undefined,
   )
 
-  // 成功メッセージ（より良いUXのためにToastやNotificationを使うことも検討）
   alert(`アルバム「${result.title}」を作成しました！（${result.imageCount}枚の画像）`)
-
   closeDialog()
 }
 
-// アルバムに追加
 const addToAlbum = async (data: { albumId: string }): Promise<void> => {
   try {
     const selectedImageIds = Array.from(imageStore.selectedImageIds)
-
-    // 実際のAPIを呼び出し
     const updatedAlbum = await albumService.addImagesToAlbum(data.albumId, selectedImageIds)
 
-    // 成功メッセージ
     alert(`${selectedImageIds.length}枚の画像をアルバム「${updatedAlbum.title}」に追加しました！`)
-
-    // 選択を解除
     imageStore.deselectAllImages()
-
     closeAddDialog()
   } catch (error) {
     console.error('Failed to add to album:', error)
-    throw error // AddToAlbumDialog側でエラー表示
+    throw error
   }
 }
 
-// 再試行
 const retryLoad = () => {
   imageStore.clearError()
   imageStore.fetchImages(searchQuery.value || undefined)
 }
 
-// コンポーネントマウント時に画像一覧を取得
 onMounted(() => {
   imageStore.fetchImages()
 })
@@ -247,7 +221,7 @@ onMounted(() => {
 .searchInput {
   width: 100%;
   padding: 8px 12px;
-  padding-right: 36px; // クリアボタンのスペースを確保
+  padding-right: 36px;
   border: 1px solid #ddd;
   border-radius: 6px;
   font-size: 14px;
