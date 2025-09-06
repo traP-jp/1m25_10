@@ -38,9 +38,9 @@ const testSections = [
     path: '/test/traq-file',
   },
   {
-    title: 'traQ Message Search Test',
-    description: 'traQ /messages 検索の透過呼び出しを試すデバッグページ',
-    path: '/test/traq-message-search',
+    title: 'traQ Image Search Test',
+    description: 'traQ 画像検索のテスト - traQ /messages 検索を利用して画像UUIDを抽出',
+    path: '/test/traq-image-search',
   },
 ]
 

@@ -1,7 +1,7 @@
 <template>
-  <div class="traq-message-search-test">
+  <div class="traq-image-search-test">
     <div class="container">
-      <h1>traQ Message Search Test</h1>
+      <h1>traQ Image Search Test</h1>
 
       <div class="test-section">
         <h2>Authentication Status</h2>
@@ -14,8 +14,7 @@
       </div>
 
       <div v-if="isLoggedIn" class="test-section">
-        <h2>Search Test</h2>
-        <p>Use the form below to run traQ message search (hasImage=true) and inspect results.</p>
+        <h2>Image Search (via traQ message search)</h2>
         <div class="form-grid">
           <label>
             word
@@ -75,7 +74,7 @@
 
         <div class="actions">
           <button @click="setExample" :disabled="loading">[Set Example]</button>
-          <button @click="runSearch" :disabled="loading">[Search]</button>
+          <button @click="runSearch" :disabled="loading">[Message Search]</button>
           <button @click="runExtract" :disabled="loading">[Extract Image UUIDs]</button>
         </div>
 
@@ -98,7 +97,7 @@
       <div class="test-section">
         <h2>API Endpoints</h2>
         <div class="endpoint-info">
-          <h3>Message Endpoints:</h3>
+          <h3>Relevant Endpoints:</h3>
           <ul>
             <li>
               <code>GET /api/v1/traq/messages</code> - traQ message search proxy (all traQ query
@@ -259,7 +258,7 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.traq-message-search-test {
+.traq-image-search-test {
   min-height: 100vh;
   background: #f8f9fa;
   padding: 20px;
