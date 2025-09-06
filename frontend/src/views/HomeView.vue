@@ -38,7 +38,12 @@
         </div>
 
         <!-- 選択された画像がある場合の操作ボタン -->
-        <div :class="[$style.selectionActions, { [$style.visible]: imageStore.selectedImageCount > 0 }]">
+        <div
+          :class="[
+            $style.selectionActions,
+            { [$style.visible]: imageStore.selectedImageCount > 0 },
+          ]"
+        >
           <button
             @click="imageStore.deselectAllImages"
             :class="$style.clearSelectionButton"

@@ -78,7 +78,7 @@ export const useImageStore = defineStore('image', {
         const moreImages = await imageService.getImages(
           this.currentSearchQuery,
           this.pageSize,
-          this.currentOffset
+          this.currentOffset,
         )
 
         if (moreImages.length === 0) {
