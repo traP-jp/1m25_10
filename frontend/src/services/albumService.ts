@@ -1,5 +1,3 @@
-// アルバム関連のAPIサービス（OpenAPI仕様準拠）
-
 import { apiClient } from './apiClient'
 import type {
   Album,
@@ -36,6 +34,23 @@ export class AlbumService {
   // アルバム更新（PUT /albums/{id}）
   async updateAlbum(albumId: string, albumData: UpdateAlbumRequest): Promise<Album> {
     return apiClient.put<Album>(`/albums/${albumId}`, albumData)
+  }
+
+  async addImagesToAlbum(albumId: string, imageIds: string[]): Promise<Album> {
+    const currentAlbum = await this.getAlbumDetail(albumId)
+
+    const existingImageIds = new Set(currentAlbum.images)
+
+    const newImageIds = imageIds.filter((id) => !existingImageIds.has(id))
+    const allImageIds = [...currentAlbum.images, ...newImageIds]
+
+    const updateData: UpdateAlbumRequest = {
+      title: currentAlbum.title,
+      description: currentAlbum.description,
+      images: allImageIds,
+    }
+
+    return this.updateAlbum(albumId, updateData)
   }
 
   // アルバム削除（DELETE /albums/{id}）
