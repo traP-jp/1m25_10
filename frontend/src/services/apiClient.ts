@@ -2,11 +2,12 @@
 
 import axios, { type AxiosInstance, type AxiosResponse } from 'axios'
 import type { ApiError } from '@/types'
+import { resolveApiBaseUrl } from '@/config/env'
 
 class ApiClient {
   private client: AxiosInstance
 
-  constructor(baseURL: string = 'http://localhost:3001') {
+  constructor(baseURL: string = resolveApiBaseUrl()) {
     this.client = axios.create({
       baseURL,
       timeout: 10000,
