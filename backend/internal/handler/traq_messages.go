@@ -346,7 +346,8 @@ func (h *Handler) searchTraqMessagesWithStampFilter(c echo.Context, p *traqMessa
 	for _, raw := range env.Hits {
 		var v traqMessageStampView
 		if err := json.Unmarshal(raw, &v); err != nil {
-			// 1件の失敗で全体を止めない。読み飛ばし。
+			// 1件の失敗で全体を止めない。読み飛ばし。ただしエラーはログに記録する。
+			log.Printf("failed to unmarshal traq message: %v (raw: %.100s)", err, string(raw))
 			continue
 		}
 		for _, s := range v.Stamps {
