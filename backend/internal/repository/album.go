@@ -120,12 +120,21 @@ func (r *sqlRepositoryImpl) PostAlbum(ctx context.Context, params domain.PostAlb
 		VALUES (:id, :album_id, :image_id)
 	`
 	for _, imgID := range params.Images {
+		_, err := r.GetImage(ctx, imgID)
+		if err != nil {
+			if errors.Is(err, ErrNotFound) {
+				_, err = r.PostImage(ctx, imgID)
+				if err != nil {
+					return nil, err
+				}
+			}
+		}
 		newAlbumImage := AlbumImage{
 			Id:      uuid.New(),
 			AlbumID: newAlbum.Id,
 			ImageID: imgID,
 		}
-		_, err := r.db.NamedExecContext(ctx, query, newAlbumImage)
+		_, err = r.db.NamedExecContext(ctx, query, newAlbumImage)
 		if err != nil {
 			return nil, err
 		}
