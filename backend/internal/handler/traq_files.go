@@ -2,6 +2,7 @@ package handler
 
 import (
 	"io"
+	"log"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -26,7 +27,11 @@ func (h *Handler) GetTraqFile(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to fetch file from traQ").SetInternal(err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if cerr := resp.Body.Close(); cerr != nil {
+			log.Printf("warn: failed to close response body: %v", cerr)
+		}
+	}()
 
 	// traQ APIのレスポンスをそのままクライアントに返す
 	return h.proxyResponse(c, resp)
@@ -51,7 +56,11 @@ func (h *Handler) GetTraqFileThumbnail(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to fetch thumbnail from traQ").SetInternal(err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if cerr := resp.Body.Close(); cerr != nil {
+			log.Printf("warn: failed to close response body: %v", cerr)
+		}
+	}()
 
 	// traQ APIのレスポンスをそのままクライアントに返す
 	return h.proxyResponse(c, resp)
