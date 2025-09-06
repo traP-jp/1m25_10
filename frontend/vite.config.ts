@@ -12,7 +12,6 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
-  // 開発時のみ有効
   server: {
     proxy: {
       '/api': {

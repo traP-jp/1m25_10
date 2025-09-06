@@ -16,7 +16,7 @@ func New(repo repository.Repository) *Handler {
 	}
 }
 
-func (h *Handler) SetupRoutes(api *echo.Group) {
+func (h *Handler) SetupAppRoutes(api *echo.Group) {
 	// ping API
 	pingAPI := api.Group("/ping")
 	{
@@ -37,4 +37,13 @@ func (h *Handler) SetupRoutes(api *echo.Group) {
 		albumAPI.GET("", h.GetAlbums)
 		albumAPI.GET("/:id", h.GetAlbum)
 	}
+}
+
+// SetupAuthRoutes は `/api/auth` にマウントされる Auth 専用ルートを登録します。
+// 引数の `authGroup` は既に `/api/auth` のグループであることを想定します。
+func (h *Handler) SetupAuthRoutes(authGroup *echo.Group) {
+	authGroup.GET("/request", h.AuthRequest)
+	authGroup.GET("/callback", h.AuthCallback)
+	authGroup.GET("/me", h.AuthMe)
+	authGroup.POST("/logout", h.AuthLogout)
 }

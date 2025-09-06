@@ -12,7 +12,9 @@ node_modules
 dist
 dist-ssr
 coverage
-*.local
+# Env files
+# Keep mode-specific env files tracked; ignore only local overrides
+.env*.local
 
 # Vite
 .vite
