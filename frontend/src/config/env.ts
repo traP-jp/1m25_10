@@ -53,7 +53,7 @@ export interface ImageUrlConfig {
 export function resolveImageUrlConfig(): ImageUrlConfig {
   // 本番環境かどうかの判定
   const isProduction = env.PROD || (env.VITE_API_BASE_URL?.includes('trap.show') ?? false)
-  
+
   // カスタムベースURLが設定されている場合
   if (env.VITE_IMAGE_BASE_URL && env.VITE_IMAGE_BASE_URL.trim() !== '') {
     return {

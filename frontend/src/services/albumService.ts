@@ -41,23 +41,23 @@ export class AlbumService {
   // 選択した画像をアルバムに追加
   async addImagesToAlbum(albumId: string, imageIds: string[]): Promise<Album> {
     // まず現在のアルバム詳細を取得
-    const currentAlbum = await this.getAlbumDetail(albumId);
-    
+    const currentAlbum = await this.getAlbumDetail(albumId)
+
     // 既存の画像IDのSetを作成して重複を避ける
-    const existingImageIds = new Set(currentAlbum.images);
-    
+    const existingImageIds = new Set(currentAlbum.images)
+
     // 新しい画像IDを追加（重複を除外）
-    const newImageIds = imageIds.filter(id => !existingImageIds.has(id));
-    const allImageIds = [...currentAlbum.images, ...newImageIds];
-    
+    const newImageIds = imageIds.filter((id) => !existingImageIds.has(id))
+    const allImageIds = [...currentAlbum.images, ...newImageIds]
+
     // 統合された画像リストでアルバムを更新
     const updateData: UpdateAlbumRequest = {
       title: currentAlbum.title,
       description: currentAlbum.description,
-      images: allImageIds
-    };
-    
-    return this.updateAlbum(albumId, updateData);
+      images: allImageIds,
+    }
+
+    return this.updateAlbum(albumId, updateData)
   }
 
   // アルバム削除（DELETE /albums/{id}）
