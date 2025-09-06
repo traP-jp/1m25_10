@@ -1,5 +1,3 @@
-// アルバム関連のAPIサービス（OpenAPI仕様準拠）
-
 import { apiClient } from './apiClient'
 import type {
   Album,
@@ -38,19 +36,14 @@ export class AlbumService {
     return apiClient.put<Album>(`/albums/${albumId}`, albumData)
   }
 
-  // 選択した画像をアルバムに追加
   async addImagesToAlbum(albumId: string, imageIds: string[]): Promise<Album> {
-    // まず現在のアルバム詳細を取得
     const currentAlbum = await this.getAlbumDetail(albumId)
 
-    // 既存の画像IDのSetを作成して重複を避ける
     const existingImageIds = new Set(currentAlbum.images)
 
-    // 新しい画像IDを追加（重複を除外）
     const newImageIds = imageIds.filter((id) => !existingImageIds.has(id))
     const allImageIds = [...currentAlbum.images, ...newImageIds]
 
-    // 統合された画像リストでアルバムを更新
     const updateData: UpdateAlbumRequest = {
       title: currentAlbum.title,
       description: currentAlbum.description,

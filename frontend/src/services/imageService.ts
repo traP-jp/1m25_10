@@ -1,5 +1,3 @@
-// 画像関連のAPIサービス（OpenAPI仕様準拠）
-
 import { apiClient } from './apiClient'
 import type { Image, ImageDetail, GetImagesParams } from '@/types'
 

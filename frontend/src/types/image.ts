@@ -1,5 +1,3 @@
-// 画像関連の型定義（OpenAPI仕様準拠）
-
 export interface Post {
   id: string // UUID
   content: string

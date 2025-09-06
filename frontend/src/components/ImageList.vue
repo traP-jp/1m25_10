@@ -1,17 +1,14 @@
 <template>
   <div :class="$style.imageListContainer">
-    <!-- ローディング状態 -->
     <div v-if="loading" :class="$style.loading">
       <p>画像を読み込み中...</p>
     </div>
 
-    <!-- エラー状態 -->
     <div v-else-if="error" :class="$style.error">
       <p>エラーが発生しました: {{ error }}</p>
       <button @click="$emit('retry')" :class="$style.retryButton">再試行</button>
     </div>
 
-    <!-- 画像一覧 -->
     <div v-else-if="images.length > 0" :class="$style.imageGrid">
       <ImageCard
         v-for="image in images"
@@ -22,7 +19,6 @@
         @toggle-selection="() => $emit('toggleSelection', image.id)"
       />
 
-      <!-- Load more ボタン -->
       <div
         v-if="hasMore"
         :class="[$style.loadMoreCard, { [$style.loading]: loadingMore }]"
@@ -35,7 +31,6 @@
       </div>
     </div>
 
-    <!-- 画像がない場合 -->
     <div v-else :class="$style.empty">
       <p v-if="hasSearchQuery">検索条件に一致する画像がありません</p>
       <p v-else>まだ画像がありません</p>

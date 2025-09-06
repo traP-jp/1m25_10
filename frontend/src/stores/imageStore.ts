@@ -8,41 +8,30 @@ const albumService = new AlbumService()
 export const useImageStore = defineStore('image', {
   state: () => ({
     images: [] as Image[],
-    imageDetails: {} as Record<string, ImageDetail>, // 画像詳細をキャッシュ
+    imageDetails: {} as Record<string, ImageDetail>,
     currentImage: null as ImageDetail | null,
-    selectedImageIds: new Set<string>(), // 選択された画像ID
+    selectedImageIds: new Set<string>(),
     loading: false,
-    loadingMore: false, // "Load more"ボタンのローディング状態
+    loadingMore: false,
     error: null as string | null,
-    hasMore: true, // さらに画像があるかどうか
-    currentOffset: 0, // 現在のオフセット
-    currentSearchQuery: undefined as string | undefined, // 現在の検索クエリ
-    pageSize: 20, // ページサイズ
+    hasMore: true,
+    currentOffset: 0,
+    currentSearchQuery: undefined as string | undefined,
+    pageSize: 20,
   }),
 
   getters: {
-    // 画像数
     imageCount: (state) => state.images.length,
-
-    // 選択された画像数
     selectedImageCount: (state) => state.selectedImageIds.size,
-
-    // 選択された画像一覧
     selectedImages: (state) => {
       return state.images.filter((image) => state.selectedImageIds.has(image.id))
     },
-
-    // 特定のユーザーの画像
     imagesByCreator: (state) => {
       return (creatorId: string) => state.images.filter((image) => image.creator === creatorId)
     },
-
-    // キャッシュされた画像詳細を取得
     getImageDetail: (state) => {
       return (imageId: string) => state.imageDetails[imageId]
     },
-
-    // 画像URLを生成
     getImageUrl: () => {
       return (image: Image): string => {
         // 環境設定に基づいて画像URLを生成
@@ -52,7 +41,6 @@ export const useImageStore = defineStore('image', {
   },
 
   actions: {
-    // 全画像取得（検索クエリ対応）
     async fetchImages(searchQuery?: string) {
       this.loading = true
       this.error = null
@@ -65,7 +53,6 @@ export const useImageStore = defineStore('image', {
         const images = await imageService.getImages(searchQuery, this.pageSize, 0)
         this.images = images
 
-        // 取得した画像数がページサイズより少ない場合、これ以上データがない
         if (images.length < this.pageSize) {
           this.hasMore = false
         } else {
@@ -79,7 +66,6 @@ export const useImageStore = defineStore('image', {
       }
     },
 
-    // さらに画像を読み込む
     async loadMoreImages() {
       if (!this.hasMore || this.loadingMore) {
         return
@@ -101,7 +87,6 @@ export const useImageStore = defineStore('image', {
           this.images.push(...moreImages)
           this.currentOffset += moreImages.length
 
-          // 取得した画像数がページサイズより少ない場合、これ以上データがない
           if (moreImages.length < this.pageSize) {
             this.hasMore = false
           }
@@ -114,7 +99,6 @@ export const useImageStore = defineStore('image', {
       }
     },
 
-    // 特定の画像詳細取得
     async fetchImageDetail(imageId: string) {
       this.loading = true
       this.error = null
@@ -122,8 +106,6 @@ export const useImageStore = defineStore('image', {
       try {
         const imageDetail = await imageService.getImageDetail(imageId)
         this.currentImage = imageDetail
-
-        // 画像詳細をキャッシュ
         this.imageDetails[imageId] = imageDetail
 
         return imageDetail
@@ -136,17 +118,14 @@ export const useImageStore = defineStore('image', {
       }
     },
 
-    // エラーをクリア
     clearError() {
       this.error = null
     },
 
-    // 現在の画像をクリア
     clearCurrentImage() {
       this.currentImage = null
     },
 
-    // 画像選択機能
     selectImage(imageId: string) {
       this.selectedImageIds.add(imageId)
     },
@@ -167,7 +146,6 @@ export const useImageStore = defineStore('image', {
       this.selectedImageIds.clear()
     },
 
-    // バルク操作
     async createAlbumFromSelectedImages(albumTitle: string, albumDescription?: string) {
       if (this.selectedImageIds.size === 0) {
         throw new Error('画像が選択されていません')
@@ -187,10 +165,7 @@ export const useImageStore = defineStore('image', {
 
         console.log('Creating album with data:', albumData)
 
-        // 実際のアルバム作成APIを呼び出し
         const createdAlbum = await albumService.createAlbum(albumData)
-
-        // 選択をクリア
         this.selectedImageIds.clear()
 
         return {
