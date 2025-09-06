@@ -12,7 +12,7 @@ interface Emits {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  isSelected: false
+  isSelected: false,
 })
 
 const emit = defineEmits<Emits>()
