@@ -21,6 +21,18 @@
         :is-selected="isImageSelected(image.id)"
         @toggle-selection="() => $emit('toggleSelection', image.id)"
       />
+
+      <!-- Load more ボタン -->
+      <div
+        v-if="hasMore"
+        :class="[$style.loadMoreCard, { [$style.loading]: loadingMore }]"
+        @click="$emit('loadMore')"
+      >
+        <div :class="$style.loadMoreContent">
+          <span v-if="!loadingMore">Load more</span>
+          <span v-else>Loading...</span>
+        </div>
+      </div>
     </div>
 
     <!-- 画像がない場合 -->
@@ -41,12 +53,15 @@ interface Props {
   error?: string | null
   selectedImageIds?: Set<string>
   hasSearchQuery?: boolean
+  hasMore?: boolean
+  loadingMore?: boolean
   getImageUrl: (image: Image) => string
 }
 
 interface Emits {
   retry: []
   toggleSelection: [imageId: string]
+  loadMore: []
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -54,6 +69,8 @@ const props = withDefaults(defineProps<Props>(), {
   error: null,
   selectedImageIds: () => new Set(),
   hasSearchQuery: false,
+  hasMore: false,
+  loadingMore: false,
 })
 
 defineEmits<Emits>()
@@ -133,11 +150,47 @@ const isImageSelected = (imageId: string): boolean => {
   }
 }
 
+.loadMoreCard {
+  width: 196px;
+  height: 196px;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: #f9f9f9;
+
+  &:hover {
+    border-color: #007bff;
+    background-color: #f0f8ff;
+  }
+
+  &.loading {
+    cursor: not-allowed;
+    opacity: 0.6;
+    border-color: #999;
+  }
+}
+
+.loadMoreContent {
+  text-align: center;
+  color: #666;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
 // レスポンシブデザイン
 @media (max-width: 768px) {
   .imageGrid {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 16px;
+  }
+
+  .loadMoreCard {
+    width: 150px;
+    height: 150px;
   }
 }
 
@@ -145,6 +198,12 @@ const isImageSelected = (imageId: string): boolean => {
   .imageGrid {
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     gap: 12px;
+  }
+
+  .loadMoreCard {
+    width: 120px;
+    height: 120px;
+    font-size: 0.9rem;
   }
 }
 </style>

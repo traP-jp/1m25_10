@@ -5,11 +5,19 @@ import type { Image, ImageDetail, GetImagesParams } from '@/types'
 
 export class ImageService {
   // 全画像取得（GET /images）
-  async getImages(searchQuery?: string): Promise<Image[]> {
+  async getImages(searchQuery?: string, limit?: number, offset?: number): Promise<Image[]> {
     const queryParams: GetImagesParams = {}
 
     if (searchQuery && searchQuery.trim()) {
       queryParams.word = searchQuery.trim()
+    }
+
+    if (limit !== undefined) {
+      queryParams.limit = limit
+    }
+
+    if (offset !== undefined) {
+      queryParams.offset = offset
     }
 
     return apiClient.get<Image[]>('/images', queryParams as Record<string, unknown>)

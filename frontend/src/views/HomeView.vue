@@ -80,9 +80,12 @@
       :error="imageStore.error"
       :selected-image-ids="imageStore.selectedImageIds"
       :has-search-query="!!searchQuery"
+      :has-more="imageStore.hasMore"
+      :loading-more="imageStore.loadingMore"
       :get-image-url="imageStore.getImageUrl"
       @retry="retryLoad"
       @toggle-selection="imageStore.toggleImageSelection"
+      @load-more="loadMoreImages"
     />
   </div>
 </template>
@@ -156,6 +159,10 @@ const addToAlbum = async (data: { albumId: string }): Promise<void> => {
 const retryLoad = () => {
   imageStore.clearError()
   imageStore.fetchImages(searchQuery.value || undefined)
+}
+
+const loadMoreImages = () => {
+  imageStore.loadMoreImages()
 }
 
 onMounted(() => {

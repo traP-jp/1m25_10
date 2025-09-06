@@ -12,7 +12,12 @@ export const useImageStore = defineStore('image', {
     currentImage: null as ImageDetail | null,
     selectedImageIds: new Set<string>(), // 選択された画像ID
     loading: false,
+    loadingMore: false, // "Load more"ボタンのローディング状態
     error: null as string | null,
+    hasMore: true, // さらに画像があるかどうか
+    currentOffset: 0, // 現在のオフセット
+    currentSearchQuery: undefined as string | undefined, // 現在の検索クエリ
+    pageSize: 20, // ページサイズ
   }),
 
   getters: {
@@ -51,16 +56,61 @@ export const useImageStore = defineStore('image', {
     async fetchImages(searchQuery?: string) {
       this.loading = true
       this.error = null
+      this.currentOffset = 0
+      this.currentSearchQuery = searchQuery
+      this.hasMore = true
 
       try {
-        console.log('Search query:', searchQuery) // デバッグ用ログ
-        const images = await imageService.getImages(searchQuery)
+        console.log('Search query:', searchQuery)
+        const images = await imageService.getImages(searchQuery, this.pageSize, 0)
         this.images = images
+
+        // 取得した画像数がページサイズより少ない場合、これ以上データがない
+        if (images.length < this.pageSize) {
+          this.hasMore = false
+        } else {
+          this.currentOffset = this.pageSize
+        }
       } catch (error) {
         this.error = error instanceof Error ? error.message : 'Unknown error occurred'
         console.error('Error fetching images:', error)
       } finally {
         this.loading = false
+      }
+    },
+
+    // さらに画像を読み込む
+    async loadMoreImages() {
+      if (!this.hasMore || this.loadingMore) {
+        return
+      }
+
+      this.loadingMore = true
+      this.error = null
+
+      try {
+        const moreImages = await imageService.getImages(
+          this.currentSearchQuery,
+          this.pageSize,
+          this.currentOffset
+        )
+
+        if (moreImages.length === 0) {
+          this.hasMore = false
+        } else {
+          this.images.push(...moreImages)
+          this.currentOffset += moreImages.length
+
+          // 取得した画像数がページサイズより少ない場合、これ以上データがない
+          if (moreImages.length < this.pageSize) {
+            this.hasMore = false
+          }
+        }
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : 'Unknown error occurred'
+        console.error('Error loading more images:', error)
+      } finally {
+        this.loadingMore = false
       }
     },
 

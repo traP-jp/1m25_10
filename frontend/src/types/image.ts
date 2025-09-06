@@ -20,4 +20,6 @@ export interface ImageDetail {
 // 画像検索用のクエリパラメータ
 export interface GetImagesParams {
   word?: string // 検索キーワード
+  limit?: number // 取得件数 (デフォルト: 20)
+  offset?: number // オフセット (デフォルト: 0)
 }
