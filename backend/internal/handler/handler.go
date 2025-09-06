@@ -40,6 +40,8 @@ func (h *Handler) SetupAppRoutes(api *echo.Group) {
 		albumAPI.GET("", h.GetAlbums)
 		albumAPI.GET("/:id", h.GetAlbum)
 		albumAPI.POST("", h.PostAlbum, middleware.UsernameProvider)
+		albumAPI.DELETE("/:id", h.DeleteAlbum, middleware.UsernameProvider)
+		albumAPI.PATCH("/:id", h.UpdateAlbum, middleware.UsernameProvider)
 	}
 
 	// images API
