@@ -151,12 +151,13 @@ func (h *Handler) DeleteAlbum(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to retrieve album").SetInternal(err)
 	}
 
+	if deleter != album.Creator {
+			return echo.NewHTTPError(http.StatusForbidden, "Forbidden")
+		}
+
 	if err := h.repo.DeleteAlbum(c.Request().Context(), albumID); err != nil {
 		if errors.Is(err, domain.ErrNotFound) {
 			return echo.NewHTTPError(http.StatusNotFound, "Album not found")
-		}
-		if deleter != album.Creator {
-			return echo.NewHTTPError(http.StatusForbidden, "Forbidden")
 		}
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to delete album").SetInternal(err)
 	}
