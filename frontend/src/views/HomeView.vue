@@ -7,7 +7,7 @@
       </div>
 
       <!-- 検索・フィルタ -->
-      <div :class="$style.controls">
+      <div :class="[$style.controls, { [$style.hasSelection]: imageStore.selectedImageCount > 0 }]">
         <div :class="$style.searchContainer">
           <div :class="$style.searchInputWrapper">
             <input
@@ -38,7 +38,7 @@
         </div>
 
         <!-- 選択された画像がある場合の操作ボタン -->
-        <div v-if="imageStore.selectedImageCount > 0" :class="$style.selectionActions">
+        <div :class="[$style.selectionActions, { [$style.visible]: imageStore.selectedImageCount > 0 }]">
           <button
             @click="imageStore.deselectAllImages"
             :class="$style.clearSelectionButton"
@@ -194,21 +194,26 @@ onMounted(() => {
 
 .controls {
   display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
+  gap: 0;
   align-items: center;
   padding: 16px;
   background-color: #f8f9fa;
   border-radius: 8px;
   border: 1px solid #e9ecef;
+  min-height: 64px;
+  transition: gap 0.3s ease;
+
+  &.hasSelection {
+    gap: 16px;
+  }
 }
 
 .searchContainer {
   flex: 1;
-  min-width: 200px;
   display: flex;
   gap: 8px;
   align-items: center;
+  min-width: 0;
 }
 
 .searchInputWrapper {
@@ -286,10 +291,26 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 8px 16px;
-  background-color: #e3f2fd;
-  border-radius: 6px;
-  border: 1px solid #90caf9;
+  padding: 8px 0;
+  background-color: transparent;
+  border-radius: 0;
+  border: 1px solid transparent;
+  opacity: 0;
+  max-width: 0;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  pointer-events: none;
+  white-space: nowrap;
+
+  &.visible {
+    opacity: 1;
+    max-width: 500px;
+    padding: 8px 16px;
+    background-color: #e3f2fd;
+    border-radius: 6px;
+    border: 1px solid #90caf9;
+    pointer-events: auto;
+  }
 }
 
 .clearSelectionButton {
@@ -305,7 +326,7 @@ onMounted(() => {
   cursor: pointer;
   border-radius: 50%;
   transition: all 0.2s;
-  margin-right: -4px; // 選択数テキストとの間隔調整
+  margin-right: -4px;
 
   &:hover {
     background-color: #f0f0f0;
@@ -362,6 +383,7 @@ onMounted(() => {
   .controls {
     flex-direction: column;
     align-items: stretch;
+    min-height: auto;
   }
 
   .searchContainer {
@@ -370,8 +392,9 @@ onMounted(() => {
   }
 
   .selectionActions {
-    flex-direction: column;
-    text-align: center;
+    &.visible {
+      max-width: none;
+    }
   }
 
   .title {
