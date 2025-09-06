@@ -53,6 +53,7 @@ const isSidebarOpen = ref(true)
 }
 .main {
   width: 100%;
+  background: #f8f9fa;
 }
 
 .app[data-sidebar-open='false'] .sidebar {
