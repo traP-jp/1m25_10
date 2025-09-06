@@ -16,3 +16,8 @@ export interface ImageDetail {
   creator: string // UUID
   post: Post
 }
+
+// 画像検索用のクエリパラメータ
+export interface GetImagesParams {
+  word?: string // 検索キーワード
+}
