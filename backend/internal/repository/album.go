@@ -262,12 +262,23 @@ func (r *sqlRepositoryImpl) UpdateAlbum(ctx context.Context, albumID uuid.UUID, 
 			VALUES (:id, :album_id, :image_id)
 		`
 		for _, imgID := range *params.Images {
+			_, err := r.GetImage(ctx, imgID)
+			if err != nil {
+				if errors.Is(err, ErrNotFound) {
+					_, err = r.PostImage(ctx, imgID)
+					if err != nil {
+						return fmt.Errorf("failed to post new image (image_id=%s): %w", imgID, err)
+					}
+				} else {
+					return fmt.Errorf("failed to get image (image_id=%s): %w", imgID, err)
+				}
+			}
 			newAlbumImage := AlbumImage{
 				Id:      uuid.New(),
 				AlbumID: albumID,
 				ImageID: imgID,
 			}
-			_, err := r.db.NamedExecContext(ctx, insQuery, newAlbumImage)
+			_, err = r.db.NamedExecContext(ctx, insQuery, newAlbumImage)
 			if err != nil {
 				return fmt.Errorf("failed to insert new album image (album_id=%s, image_id=%s): %w", albumID, imgID, err)
 			}
