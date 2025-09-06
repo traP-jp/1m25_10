@@ -7,6 +7,7 @@ export const useImageStore = defineStore('image', {
     images: [] as Image[],
     imageDetails: {} as Record<string, ImageDetail>, // 画像詳細をキャッシュ
     currentImage: null as ImageDetail | null,
+    selectedImageIds: new Set<string>(), // 選択された画像ID
     loading: false,
     error: null as string | null,
   }),
@@ -14,6 +15,14 @@ export const useImageStore = defineStore('image', {
   getters: {
     // 画像数
     imageCount: (state) => state.images.length,
+
+    // 選択された画像数
+    selectedImageCount: (state) => state.selectedImageIds.size,
+
+    // 選択された画像一覧
+    selectedImages: (state) => {
+      return state.images.filter((image) => state.selectedImageIds.has(image.id))
+    },
 
     // 特定のユーザーの画像
     imagesByCreator: (state) => {
@@ -73,6 +82,27 @@ export const useImageStore = defineStore('image', {
     // 現在の画像をクリア
     clearCurrentImage() {
       this.currentImage = null
+    },
+
+    // 画像選択機能
+    selectImage(imageId: string) {
+      this.selectedImageIds.add(imageId)
+    },
+
+    deselectImage(imageId: string) {
+      this.selectedImageIds.delete(imageId)
+    },
+
+    toggleImageSelection(imageId: string) {
+      if (this.selectedImageIds.has(imageId)) {
+        this.selectedImageIds.delete(imageId)
+      } else {
+        this.selectedImageIds.add(imageId)
+      }
+    },
+
+    deselectAllImages() {
+      this.selectedImageIds.clear()
     },
   },
 })
