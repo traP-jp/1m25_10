@@ -22,7 +22,12 @@
         </p>
 
         <div class="input-section">
-          <input v-model="uuid" type="text" placeholder="Enter image/file UUID" class="uuid-input" />
+          <input
+            v-model="uuid"
+            type="text"
+            placeholder="Enter image/file UUID"
+            class="uuid-input"
+          />
           <button @click="run" :disabled="!uuid || loading" class="test-button">Run</button>
           <button @click="setTemplate" :disabled="loading" class="test-button">Use Template</button>
         </div>
