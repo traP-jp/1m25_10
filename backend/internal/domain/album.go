@@ -8,20 +8,20 @@ import (
 
 // Album represents an album entity in the domain
 type Album struct {
-	Id          uuid.UUID
-	Title       string
-	Description string
-	Creator     string
-	Images      []uuid.UUID
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	Id          uuid.UUID   `json:"id"`
+	Title       string      `json:"title"`
+	Description string      `json:"description"`
+	Creator     string      `json:"creator"`
+	Images      []uuid.UUID `json:"images"`
+	CreatedAt   time.Time   `json:"created_at"`
+	UpdatedAt   time.Time   `json:"updated_at"`
 }
 
 // AlbumItem represents a simplified album item for list views
 type AlbumItem struct {
-	Id      uuid.UUID
-	Title   string
-	Creator string
+	Id      uuid.UUID `json:"id"`
+	Title   string    `json:"title"`
+	Creator string    `json:"creator"`
 }
 
 // AlbumFilter represents filtering criteria for albums
@@ -36,15 +36,15 @@ type AlbumFilter struct {
 
 // PostAlbumParams represents parameters for creating a new album
 type PostAlbumParams struct {
-	Title       string
-	Description string
-	Creator     string
-	Images      []uuid.UUID
+	Title       string      `json:"title"`
+	Description string      `json:"description"`
+	Creator     string      `json:"creator"`
+	Images      []uuid.UUID `json:"images"`
 }
 
 // UpdateAlbumParams represents parameters for updating an album
 type UpdateAlbumParams struct {
-	Title       *string
-	Description *string
-	Images      *[]uuid.UUID
+	Title       *string      `json:"title,omitempty"`
+	Description *string      `json:"description,omitempty"`
+	Images      *[]uuid.UUID `json:"images,omitempty"`
 }
