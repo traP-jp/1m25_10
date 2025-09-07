@@ -30,6 +30,6 @@ export function useWindowSize() {
     height,
     isMobile,
     isTablet,
-    isDesktop
+    isDesktop,
   }
 }

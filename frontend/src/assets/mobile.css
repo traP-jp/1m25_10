@@ -30,7 +30,7 @@ textarea:focus {
 /* ボタンとリンクの最小タップサイズを確保 */
 button,
 a,
-[role="button"] {
+[role='button'] {
   min-height: 44px;
   min-width: 44px;
   display: inline-flex;

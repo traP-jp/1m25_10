@@ -15,7 +15,7 @@ import BottomNavItem from './BottomNavItem.vue'
 import { sidebarItems } from '../sidebar/sidebarConfig'
 
 // モバイルでは "Test" は表示しない
-const navigationItems = sidebarItems.filter(item => item.title !== 'Test')
+const navigationItems = sidebarItems.filter((item) => item.title !== 'Test')
 </script>
 
 <style lang="scss" module>
