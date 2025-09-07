@@ -6,6 +6,7 @@ const rawMockEnabled = import.meta.env.VITE_MOCK_ENABLED as string | undefined
 const rawImageBaseUrl = import.meta.env.VITE_IMAGE_BASE_URL as string | undefined
 const rawImageFormat = import.meta.env.VITE_IMAGE_FORMAT as string | undefined
 const rawImageSize = import.meta.env.VITE_IMAGE_SIZE as string | undefined
+const rawRequireLogin = import.meta.env.VITE_REQUIRE_LOGIN as string | undefined
 
 function toBoolean(v: string | undefined): boolean | undefined {
   if (v == null) return undefined
@@ -26,6 +27,7 @@ export const env = {
   VITE_IMAGE_BASE_URL: rawImageBaseUrl,
   VITE_IMAGE_FORMAT: rawImageFormat,
   VITE_IMAGE_SIZE: rawImageSize,
+  VITE_REQUIRE_LOGIN: toBoolean(rawRequireLogin) ?? false,
 }
 
 // APIのベースURL決定（優先度）
