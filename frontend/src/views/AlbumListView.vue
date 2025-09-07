@@ -18,13 +18,9 @@
       <button :class="$style.retryButton" @click="reload">再試行</button>
     </div>
 
-    <div v-if="albumStore.loading && albums.length === 0" :class="$style.loading">
-      読み込み中…
-    </div>
+    <div v-if="albumStore.loading && albums.length === 0" :class="$style.loading">読み込み中…</div>
 
-    <div v-else-if="albums.length === 0" :class="$style.empty">
-      まだアルバムがありません。
-    </div>
+    <div v-else-if="albums.length === 0" :class="$style.empty">まだアルバムがありません。</div>
 
     <div v-else :class="$style.grid">
       <AlbumCard
@@ -39,7 +35,6 @@
       />
     </div>
   </div>
-  
 </template>
 
 <script setup lang="ts">
