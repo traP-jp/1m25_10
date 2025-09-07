@@ -1,9 +1,15 @@
 import { apiClient } from './apiClient'
 import type { Image, ImageDetail, GetImagesParams, GetImagesResponse } from '@/types'
+import { ALBUM_CHANCE_STAMP_ID } from '@/config/constants'
 
 export class ImageService {
   // 全画像取得（GET /images）
-  async getImages(searchQuery?: string, limit?: number, offset?: number): Promise<Image[]> {
+  async getImages(
+    searchQuery?: string,
+    limit?: number,
+    offset?: number,
+    options?: { albumChance?: boolean }
+  ): Promise<Image[]> {
     const queryParams: GetImagesParams = {}
 
     if (searchQuery && searchQuery.trim()) {
@@ -16,6 +22,10 @@ export class ImageService {
 
     if (offset !== undefined) {
       queryParams.offset = offset
+    }
+
+    if (options?.albumChance) {
+      queryParams.stampId = ALBUM_CHANCE_STAMP_ID
     }
 
     const response = await apiClient.get<GetImagesResponse>(

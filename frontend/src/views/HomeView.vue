@@ -27,6 +27,10 @@
               ×
             </button>
           </div>
+          <label :class="$style.switchLabel">
+            <input type="checkbox" v-model="albumChance" @change="onToggleAlbumChance" />
+            <span>アルバムチャンス</span>
+          </label>
           <button
             type="button"
             @click="performSearch"
@@ -108,8 +112,10 @@ const imageStore = useImageStore()
 const searchQuery = ref('')
 const images = computed(() => imageStore.images)
 const hasSearchQuery = computed(() => searchQuery.value.trim() !== '')
+const albumChance = ref(imageStore.albumChance)
 
 const performSearch = () => {
+  imageStore.setAlbumChance(albumChance.value)
   imageStore.fetchImages(searchQuery.value.trim() || undefined)
 }
 
@@ -173,6 +179,11 @@ const loadMoreImages = () => {
 onMounted(() => {
   imageStore.fetchImages()
 })
+
+const onToggleAlbumChance = () => {
+  imageStore.setAlbumChance(albumChance.value)
+  imageStore.fetchImages(searchQuery.value.trim() || undefined)
+}
 </script>
 <style lang="scss" module>
 .homeView {
@@ -188,6 +199,13 @@ onMounted(() => {
 
 .titleSection {
   margin-bottom: 20px;
+}
+
+.switchLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 12px;
 }
 
 .title {

@@ -18,6 +18,7 @@ export const useImageStore = defineStore('image', {
     currentOffset: 0,
     currentSearchQuery: undefined as string | undefined,
     pageSize: 20,
+  albumChance: false, // アルバムチャンスフィルタの有効/無効
   }),
 
   getters: {
@@ -47,7 +48,12 @@ export const useImageStore = defineStore('image', {
 
       try {
         console.log('Search query:', searchQuery)
-        const images = await imageService.getImages(searchQuery, this.pageSize, 0)
+        const images = await imageService.getImages(
+          searchQuery,
+          this.pageSize,
+          0,
+          { albumChance: this.albumChance },
+        )
         this.images = images
 
         if (images.length < this.pageSize) {
@@ -72,11 +78,28 @@ export const useImageStore = defineStore('image', {
       this.error = null
 
       try {
-        const moreImages = await imageService.getImages(
-          this.currentSearchQuery,
-          this.pageSize,
-          this.currentOffset,
-        )
+        let nextOffset = this.currentOffset
+        let moreImages: Image[] = []
+
+        // 空ウィンドウをスキップしながら取得（最大数回のセーフガード）
+        for (let attempt = 0; attempt < 5; attempt++) {
+          moreImages = await imageService.getImages(
+            this.currentSearchQuery,
+            this.pageSize,
+            nextOffset,
+            { albumChance: this.albumChance },
+          )
+
+          if (moreImages.length > 0 || !this.albumChance) {
+            // 画像が返ってきた、またはアルバムチャンスでないなら終了
+            this.currentOffset = nextOffset
+            break
+          }
+
+          // 0件かつアルバムチャンス => バックエンド側がフィルタして0件の可能性
+          // ウィンドウをひとつ進めて再試行
+          nextOffset += this.pageSize
+        }
 
         if (moreImages.length === 0) {
           this.hasMore = false
@@ -94,6 +117,10 @@ export const useImageStore = defineStore('image', {
       } finally {
         this.loadingMore = false
       }
+    },
+
+    setAlbumChance(enabled: boolean) {
+      this.albumChance = enabled
     },
 
     // 画像詳細を取得（必要な時のみ）
