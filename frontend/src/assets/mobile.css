@@ -1,0 +1,64 @@
+/* モバイル向けタッチ操作改善のためのグローバルスタイル */
+
+/* タップハイライト色の調整 */
+* {
+  -webkit-tap-highlight-color: rgba(0, 91, 172, 0.1);
+  -webkit-touch-callout: none;
+}
+
+/* フォーカス可能な要素のアウトラインを調整 */
+button:focus,
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid #005bac;
+  outline-offset: 2px;
+}
+
+/* モバイルでのフォーカス表示を無効化（タップ時のみ必要） */
+@media (pointer: coarse) {
+  button:focus:not(:focus-visible),
+  a:focus:not(:focus-visible),
+  input:focus:not(:focus-visible),
+  select:focus:not(:focus-visible),
+  textarea:focus:not(:focus-visible) {
+    outline: none;
+  }
+}
+
+/* ボタンとリンクの最小タップサイズを確保 */
+button,
+a,
+[role="button"] {
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 小さなボタンの場合はパディングで調整 */
+.small-button {
+  min-height: 32px;
+  min-width: 32px;
+  padding: 8px;
+}
+
+/* モバイル用のスクロール改善 */
+html {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* iOS Safariでのズーム防止（フォントサイズ16px以上） */
+input,
+select,
+textarea {
+  font-size: 16px;
+}
+
+/* プルトゥリフレッシュの無効化（必要に応じて） */
+body {
+  overscroll-behavior-y: contain;
+}
