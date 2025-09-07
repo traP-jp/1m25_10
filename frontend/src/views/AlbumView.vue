@@ -77,13 +77,9 @@ const album = computed(() => albumStore.currentAlbum)
 const albumImages = computed((): Image[] => {
   if (!album.value) return []
 
+  // 画像IDをそのままImage型として使用（Image型はIDのみを持つ）
   return album.value.images.map((imageId) => ({
     id: imageId,
-    creator: album.value!.creator,
-    post: {
-      id: `post-${imageId}`,
-      content: `Image ${imageId} in album ${album.value!.title}`,
-    },
   }))
 })
 
