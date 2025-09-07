@@ -48,6 +48,7 @@ func (h *Handler) SetupAppRoutes(api *echo.Group) {
 	imagesAPI := api.Group("/images")
 	{
 		imagesAPI.GET("", h.GetTraqMessagesSearchImages)
+		imagesAPI.GET("/:id", h.GetLatestMessageByImageID)
 	}
 
 }

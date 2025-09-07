@@ -6,6 +6,7 @@ export type TraqMessageSearchParams = {
   to?: string[]
   from?: string[]
   citation?: string
+  stampId?: string
   bot?: boolean
   hasURL?: boolean
   hasAttachments?: boolean
