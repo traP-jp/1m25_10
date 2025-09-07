@@ -365,3 +365,43 @@ func (h *Handler) searchTraqMessagesWithStampFilter(c echo.Context, p *traqMessa
 	}
 	return out, status, nil
 }
+
+// GetLatestMessageByImageID
+// GET /api/v1/images/:id
+// 指定されたファイルUUIDを含む https://q.trap.jp/files/<uuid> を語句検索し、
+// createdAt 昇順（古い順）に並べて最古の1件のヒットのみを返します。
+func (h *Handler) GetLatestMessageByImageID(c echo.Context) error {
+	id := c.Param("id")
+	if id == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "id is required")
+	}
+
+	word := "https://q.trap.jp/files/" + id
+	limit := 1
+	// 最古を取得するため昇順
+	sort := "createdAt"
+	params := &traqMessageSearchParams{
+		Word:  word,
+		Limit: &limit,
+		Sort:  sort,
+	}
+
+	body, status, err := h.searchTraqMessages(c, params)
+	if err != nil {
+		// traQ 側のエラーはそのまま中継
+		return c.Blob(status, "application/json", body)
+	}
+
+	// レスポンスから最古1件のhitのみ抽出（昇順ソートの先頭）
+	var resp struct {
+		Hits []json.RawMessage `json:"hits"`
+	}
+	if uerr := json.Unmarshal(body, &resp); uerr != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to parse traQ response").SetInternal(uerr)
+	}
+	if len(resp.Hits) == 0 {
+		return echo.NewHTTPError(http.StatusNotFound, "no message found for the given image id")
+	}
+	// 先頭(最古)のみ返す
+	return c.Blob(http.StatusOK, "application/json", resp.Hits[0])
+}
