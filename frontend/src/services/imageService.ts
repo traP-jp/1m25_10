@@ -1,6 +1,6 @@
 import { apiClient } from './apiClient'
 import type { Image, ImageDetail, GetImagesParams, GetImagesResponse } from '@/types'
-import { ALBUM_CHANCE_STAMP_ID } from '@/config/constants'
+import { getAlbumChanceStampId } from '@/config/env'
 
 export class ImageService {
   // 全画像取得（GET /images）
@@ -25,7 +25,8 @@ export class ImageService {
     }
 
     if (options?.albumChance) {
-      queryParams.stampId = ALBUM_CHANCE_STAMP_ID
+      const sid = getAlbumChanceStampId()
+      if (sid) queryParams.stampId = sid
     }
 
     const response = await apiClient.get<GetImagesResponse>(
