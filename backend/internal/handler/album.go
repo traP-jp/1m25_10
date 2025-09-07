@@ -152,8 +152,8 @@ func (h *Handler) DeleteAlbum(c echo.Context) error {
 	}
 
 	if deleter != album.Creator {
-			return echo.NewHTTPError(http.StatusForbidden, "Forbidden")
-		}
+		return echo.NewHTTPError(http.StatusForbidden, "Forbidden")
+	}
 
 	if err := h.repo.DeleteAlbum(c.Request().Context(), albumID); err != nil {
 		if errors.Is(err, domain.ErrNotFound) {
@@ -162,4 +162,72 @@ func (h *Handler) DeleteAlbum(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to delete album").SetInternal(err)
 	}
 	return c.NoContent(http.StatusNoContent)
+}
+
+// PUT /api/v1/albums/:id
+func (h *Handler) UpdateAlbum(c echo.Context) error {
+	albumID, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid album ID")
+	}
+
+	req := new(struct {
+		Title       *string  `json:"title"`
+		Description *string  `json:"description"`
+		Images      []string `json:"images"`
+	})
+	if err := c.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request body")
+	}
+
+	updater, ok := c.Get(middleware.UsernameKey).(string)
+	if !ok {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
+	}
+
+	album, err := h.repo.GetAlbum(c.Request().Context(), albumID)
+	if err != nil {
+		if errors.Is(err, domain.ErrNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, "Album not found")
+		}
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to retrieve album").SetInternal(err)
+	}
+
+	if updater != album.Creator {
+		return echo.NewHTTPError(http.StatusForbidden, "Forbidden")
+	}
+
+	images := make([]uuid.UUID, 0, len(req.Images))
+	for _, s := range req.Images {
+		s = strings.TrimSpace(s)
+		if s == "" {
+			continue
+		}
+		id, err := uuid.Parse(s)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid image id: %s", s)).SetInternal(err)
+		}
+		images = append(images, id)
+	}
+
+	params := domain.UpdateAlbumParams{
+		Title:       req.Title,
+		Description: req.Description,
+		Images:      &images,
+	}
+
+	err = h.repo.UpdateAlbum(c.Request().Context(), albumID, params)
+	if err != nil {
+		if errors.Is(err, domain.ErrNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, "Album not found")
+		}
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to update album").SetInternal(err)
+	}
+
+	updatedAlbum, err := h.repo.GetAlbum(c.Request().Context(), albumID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to retrieve updated album").SetInternal(err)
+	}
+
+	return c.JSON(http.StatusOK, updatedAlbum)
 }
