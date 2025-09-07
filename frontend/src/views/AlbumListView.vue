@@ -57,9 +57,9 @@ const loadAlbums = async () => {
 }
 
 // 再読み込み
-const retryLoad = () => {
+const retryLoad = async () => {
   albumStore.clearError()
-  loadAlbums()
+  await loadAlbums()
 }
 
 onMounted(() => {
