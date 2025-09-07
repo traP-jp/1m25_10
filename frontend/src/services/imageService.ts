@@ -3,13 +3,20 @@ import type { Image, ImageDetail, GetImagesParams, GetImagesResponse } from '@/t
 import { getAlbumChanceStampId } from '@/config/env'
 
 export class ImageService {
+  /**
+   * APIから取得した totalHits と変換済み画像配列を返す戻り値型
+   */
+  static mapResponse(res: GetImagesResponse): { images: Image[]; totalHits?: number } {
+    const images = (res.hits || []).map((id) => ({ id }))
+    return { images, totalHits: res.totalHits }
+  }
   // 全画像取得（GET /images）
   async getImages(
     searchQuery?: string,
     limit?: number,
     offset?: number,
     options?: { albumChance?: boolean }
-  ): Promise<Image[]> {
+  ): Promise<{ images: Image[]; totalHits?: number }> {
     const queryParams: GetImagesParams = {}
 
     if (searchQuery && searchQuery.trim()) {
@@ -29,12 +36,11 @@ export class ImageService {
       if (sid) queryParams.stampId = sid
     }
 
-    const response = await apiClient.get<GetImagesResponse>(
+  const response = await apiClient.get<GetImagesResponse>(
       '/images',
       queryParams as Record<string, unknown>,
     )
-    // 画像IDから基本的なImage型に変換
-    return response.hits.map((id) => ({ id }))
+  return ImageService.mapResponse(response)
   }
 
   // 特定の画像詳細取得（GET /images/{id}）

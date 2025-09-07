@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { imageService, AlbumService } from '@/services'
-import { generateImageUrl } from '@/config/env'
+import { generateImageUrl, env } from '@/config/env'
 import type { Image, ImageDetail } from '@/types'
 
 const albumService = new AlbumService()
@@ -18,7 +18,9 @@ export const useImageStore = defineStore('image', {
     currentOffset: 0,
     currentSearchQuery: undefined as string | undefined,
     pageSize: 20,
-  albumChance: false, // アルバムチャンスフィルタの有効/無効
+  albumChance: env.VITE_ALBUM_CHANCE_DEFAULT === true, // アルバムチャンス既定値（env）
+  scanOffset: 0, // アルバムチャンス時のスキャン用オフセット
+  totalHits: undefined as number | undefined, // traQのtotalHits（参考）
   }),
 
   getters: {
@@ -43,24 +45,48 @@ export const useImageStore = defineStore('image', {
       this.loading = true
       this.error = null
       this.currentOffset = 0
+      this.scanOffset = 0
       this.currentSearchQuery = searchQuery
       this.hasMore = true
 
       try {
         console.log('Search query:', searchQuery)
-        const images = await imageService.getImages(
-          searchQuery,
-          this.pageSize,
-          0,
-          { albumChance: this.albumChance },
-        )
-        this.images = images
+        let usedOffset = 0
+        let gathered: Image[] = []
+        let totalHits: number | undefined = undefined
 
-        if (images.length < this.pageSize) {
-          this.hasMore = false
+        if (!this.albumChance) {
+          const res = await imageService.getImages(searchQuery, this.pageSize, 0)
+          gathered = res.images
+          totalHits = res.totalHits
+          usedOffset = 0
         } else {
-          this.currentOffset = this.pageSize
+          // アルバムチャンス: 空ウィンドウをスキップして最初の非空ウィンドウを探す
+          const maxAttempts = 50 // セーフガード
+          let attempts = 0
+          let upperBound = Number.MAX_SAFE_INTEGER
+          while (attempts < maxAttempts) {
+            const res = await imageService.getImages(searchQuery, this.pageSize, usedOffset, {
+              albumChance: true,
+            })
+            totalHits = res.totalHits
+            if (typeof totalHits === 'number') upperBound = totalHits
+            if (res.images.length > 0) {
+              gathered = res.images
+              break
+            }
+            // 空だったので次のウィンドウへ
+            usedOffset += this.pageSize
+            if (usedOffset >= upperBound) break
+            attempts++
+          }
         }
+
+        this.images = gathered
+        this.totalHits = totalHits
+        this.currentOffset = usedOffset + gathered.length
+        this.scanOffset = usedOffset + this.pageSize
+        this.hasMore = gathered.length >= this.pageSize && (this.totalHits == null || this.currentOffset < this.totalHits)
       } catch (error) {
         this.error = error instanceof Error ? error.message : 'Unknown error occurred'
         console.error('Error fetching images:', error)
@@ -78,37 +104,51 @@ export const useImageStore = defineStore('image', {
       this.error = null
 
       try {
-        let nextOffset = this.currentOffset
-        let moreImages: Image[] = []
-
-        // 空ウィンドウをスキップしながら取得（最大数回のセーフガード）
-        for (let attempt = 0; attempt < 5; attempt++) {
-          moreImages = await imageService.getImages(
+        if (!this.albumChance) {
+          const res = await imageService.getImages(
             this.currentSearchQuery,
             this.pageSize,
-            nextOffset,
-            { albumChance: this.albumChance },
+            this.currentOffset,
           )
-
-          if (moreImages.length > 0 || !this.albumChance) {
-            // 画像が返ってきた、またはアルバムチャンスでないなら終了
-            this.currentOffset = nextOffset
-            break
+          this.totalHits = res.totalHits
+          const more = res.images
+          if (more.length === 0) {
+            this.hasMore = false
+          } else {
+            this.images.push(...more)
+            this.currentOffset += more.length
+            if (more.length < this.pageSize) this.hasMore = false
+          }
+        } else {
+          // アルバムチャンス: 空ウィンドウをスキャン
+          let usedOffset = Math.max(this.scanOffset, this.currentOffset)
+          const upperBound = this.totalHits ?? Number.MAX_SAFE_INTEGER
+          const maxAttempts = 50
+          let attempts = 0
+          let found: Image[] = []
+          while (usedOffset < upperBound && attempts < maxAttempts) {
+            const res = await imageService.getImages(
+              this.currentSearchQuery,
+              this.pageSize,
+              usedOffset,
+              { albumChance: true },
+            )
+            this.totalHits = res.totalHits
+            if (res.images.length > 0) {
+              found = res.images
+              break
+            }
+            usedOffset += this.pageSize
+            attempts++
           }
 
-          // 0件かつアルバムチャンス => バックエンド側がフィルタして0件の可能性
-          // ウィンドウをひとつ進めて再試行
-          nextOffset += this.pageSize
-        }
-
-        if (moreImages.length === 0) {
-          this.hasMore = false
-        } else {
-          this.images.push(...moreImages)
-          this.currentOffset += moreImages.length
-
-          if (moreImages.length < this.pageSize) {
+          this.scanOffset = usedOffset + this.pageSize
+          if (found.length === 0) {
             this.hasMore = false
+          } else {
+            this.images.push(...found)
+            this.currentOffset = usedOffset + found.length
+            if (found.length < this.pageSize) this.hasMore = false
           }
         }
       } catch (error) {
