@@ -143,6 +143,20 @@ type traqMessagesRawResponse struct {
 	} `json:"hits"`
 }
 
+// traQ検索レスポンスの全体を保持するための最小Envelope。
+// hitsは生のまま(json.RawMessage)で持ち、必要最小限だけ部分デコードする。
+type traqMessagesEnvelope struct {
+	TotalHits int                `json:"totalHits"`
+	Hits      []json.RawMessage `json:"hits"`
+}
+
+// stampsフィールドだけの部分ビュー
+type traqMessageStampView struct {
+	Stamps []struct {
+		StampID string `json:"stampId"`
+	} `json:"stamps"`
+}
+
 var fileUUIDRe = regexp.MustCompile(`https?://q\.trap\.jp/files/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})`)
 
 // メッセージ本文からファイルUUIDを全件抽出する
@@ -160,8 +174,9 @@ func extractUUIDsFromContent(content string) []string {
 	return res
 }
 
-// hasImage=true 固定で traQ 検索を行い、totalHits と content から抽出した画像UUIDの配列を返す。
-func (h *Handler) searchTraqImagesUUIDs(c echo.Context, p *traqMessageSearchParams) (int, []string, error) {
+// hasImage=true 固定で traQ 検索を行い、必要に応じて stampId で hits をフィルタし、
+// totalHits と content から抽出した画像UUIDの配列を返す。
+func (h *Handler) searchTraqImagesUUIDs(c echo.Context, p *traqMessageSearchParams, stampID string) (int, []string, error) {
 	// callerからのHasImage指定は無視してtrue固定
 	has := true
 	if p == nil {
@@ -169,7 +184,16 @@ func (h *Handler) searchTraqImagesUUIDs(c echo.Context, p *traqMessageSearchPara
 	}
 	p.HasImage = &has
 
-	body, status, err := h.searchTraqMessages(c, p)
+	var (
+		body   []byte
+		status int
+		err    error
+	)
+	if stampID != "" {
+		body, status, err = h.searchTraqMessagesWithStampFilter(c, p, stampID)
+	} else {
+		body, status, err = h.searchTraqMessages(c, p)
+	}
 	if err != nil {
 		// 上位で扱いやすいように、traQのステータスも含める
 		return 0, nil, fmt.Errorf("traQ search failed (status=%d): %w", status, err)
@@ -203,6 +227,7 @@ func (h *Handler) GetTraqMessagesSearchImages(c echo.Context) error {
 		Citation: c.QueryParam("citation"),
 		Sort:     c.QueryParam("sort"),
 	}
+	stampID := c.QueryParam("stampId")
 	if v := c.QueryParam("bot"); v != "" {
 		b := v == "true" || v == "1"
 		params.Bot = &b
@@ -220,7 +245,7 @@ func (h *Handler) GetTraqMessagesSearchImages(c echo.Context) error {
 	params.To = c.QueryParams()["to"]
 	params.From = c.QueryParams()["from"]
 
-	total, uuids, err := h.searchTraqImagesUUIDs(c, params)
+	total, uuids, err := h.searchTraqImagesUUIDs(c, params, stampID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -283,9 +308,62 @@ func (h *Handler) GetTraqMessagesSearch(c echo.Context) error {
 	params.To = c.QueryParams()["to"]
 	params.From = c.QueryParams()["from"]
 
+	// スタンプフィルタ（オプション）
+	if stampID := c.QueryParam("stampId"); stampID != "" {
+		body, status, err := h.searchTraqMessagesWithStampFilter(c, params, stampID)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+		return c.Blob(status, "application/json", body)
+	}
+
 	// traQのエラーはそのまま返す（検証用途）
 	body, status, _ := h.searchTraqMessages(c, params)
 	return c.Blob(status, "application/json", body)
+}
+
+// searchTraqMessagesWithStampFilter は searchTraqMessages と同等の検索を行い、
+// 返却する hits を指定した stampId を含むものだけに絞り込みます。
+// totalHits などは traQ の値をそのまま返します（再計算しません）。
+func (h *Handler) searchTraqMessagesWithStampFilter(c echo.Context, p *traqMessageSearchParams, stampID string) ([]byte, int, error) {
+	body, status, err := h.searchTraqMessages(c, p)
+	if err != nil {
+		// traQからのエラーはそのまま上位へ
+		return body, status, err
+	}
+
+	var env traqMessagesEnvelope
+	if err := json.Unmarshal(body, &env); err != nil {
+		return nil, http.StatusInternalServerError, fmt.Errorf("failed to decode traQ messages: %w", err)
+	}
+
+	if len(env.Hits) == 0 {
+		// 空ならそのまま返す
+		return body, status, nil
+	}
+
+	filtered := make([]json.RawMessage, 0, len(env.Hits))
+	for _, raw := range env.Hits {
+		var v traqMessageStampView
+		if err := json.Unmarshal(raw, &v); err != nil {
+			// 1件の失敗で全体を止めない。読み飛ばし。ただしエラーはログに記録する。
+			log.Printf("failed to unmarshal traq message: %v (raw: %.100s)", err, string(raw))
+			continue
+		}
+		for _, s := range v.Stamps {
+			if s.StampID == stampID {
+				filtered = append(filtered, raw)
+				break
+			}
+		}
+	}
+
+	env.Hits = filtered
+	out, err := json.Marshal(env)
+	if err != nil {
+		return nil, http.StatusInternalServerError, fmt.Errorf("failed to encode filtered messages: %w", err)
+	}
+	return out, status, nil
 }
 
 // GetLatestMessageByImageID
