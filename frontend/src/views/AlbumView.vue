@@ -77,13 +77,13 @@ const album = computed(() => albumStore.currentAlbum)
 const albumImages = computed((): Image[] => {
   if (!album.value) return []
 
-  return album.value.images.map(imageId => ({
+  return album.value.images.map((imageId) => ({
     id: imageId,
     creator: album.value!.creator,
     post: {
       id: `post-${imageId}`,
-      content: `Image ${imageId} in album ${album.value!.title}`
-    }
+      content: `Image ${imageId} in album ${album.value!.title}`,
+    },
   }))
 })
 
@@ -98,7 +98,7 @@ const formatDate = (dateString: string): string => {
   return date.toLocaleDateString('ja-JP', {
     year: 'numeric',
     month: 'long',
-    day: 'numeric'
+    day: 'numeric',
   })
 }
 
@@ -118,9 +118,13 @@ const retryLoad = () => {
 }
 
 // ルートのIDが変更された時にアルバムを再読み込み
-watch(albumId, () => {
-  loadAlbum()
-}, { immediate: true })
+watch(
+  albumId,
+  () => {
+    loadAlbum()
+  },
+  { immediate: true },
+)
 
 onMounted(() => {
   loadAlbum()
