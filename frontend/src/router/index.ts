@@ -86,10 +86,7 @@ router.beforeEach(async (to) => {
   if (!env.VITE_REQUIRE_LOGIN) return true
 
   // 免除ルート: ログイン導線自体と、開発用のOAuthデバッグ等
-  const publicPaths = new Set<string>([
-    '/login',
-    '/test/oauth-debug',
-  ])
+  const publicPaths = new Set<string>(['/login', '/test/oauth-debug'])
 
   // 任意: /about など完全公開にしたい場合は追加
   // publicPaths.add('/about')
