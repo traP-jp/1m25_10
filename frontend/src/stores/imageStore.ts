@@ -86,7 +86,19 @@ export const useImageStore = defineStore('image', {
         this.totalHits = totalHits
         this.currentOffset = usedOffset + gathered.length
         this.scanOffset = usedOffset + this.pageSize
-        this.hasMore = gathered.length >= this.pageSize && (this.totalHits == null || this.currentOffset < this.totalHits)
+        if (!this.albumChance) {
+          this.hasMore = gathered.length >= this.pageSize
+        } else {
+          // アルバムチャンス: たとえ今回のウィンドウの取得件数が pageSize 未満でも、
+          // 次のウィンドウでヒットする可能性があるため totalHits/scanOffset を基準に判定
+          if (gathered.length === 0) {
+            this.hasMore = false
+          } else if (this.totalHits == null) {
+            this.hasMore = true
+          } else {
+            this.hasMore = this.scanOffset < this.totalHits
+          }
+        }
       } catch (error) {
         this.error = error instanceof Error ? error.message : 'Unknown error occurred'
         console.error('Error fetching images:', error)
@@ -148,7 +160,11 @@ export const useImageStore = defineStore('image', {
           } else {
             this.images.push(...found)
             this.currentOffset = usedOffset + found.length
-            if (found.length < this.pageSize) this.hasMore = false
+            if (this.totalHits == null) {
+              this.hasMore = true
+            } else {
+              this.hasMore = this.scanOffset < this.totalHits
+            }
           }
         }
       } catch (error) {
