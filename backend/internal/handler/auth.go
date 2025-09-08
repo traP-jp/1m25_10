@@ -101,7 +101,10 @@ func (h *Handler) AuthCallback(c echo.Context) error {
 
 	// callbackへリダイレクト
 	cb := "/"
-	if cbCookie, err := c.Cookie(cookieCallbackKey); err == nil && cbCookie.Value != "" && strings.HasPrefix(cbCookie.Value, "/") {
+	if cbCookie, err := c.Cookie(cookieCallbackKey); err == nil &&
+		cbCookie.Value != "" &&
+		cbCookie.Value[0] == '/' &&
+		(len(cbCookie.Value) == 1 || (cbCookie.Value[1] != '/' && cbCookie.Value[1] != '\\')) {
 		cb = cbCookie.Value
 	}
 	delCookie(c, cookieCallbackKey)
