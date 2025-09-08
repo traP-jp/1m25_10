@@ -7,7 +7,9 @@ import { sidebarItems } from './sidebarConfig'
 <template>
   <div :class="$style.sidebar">
     <div :class="$style.logoContainer">
-      <img :class="$style.logo" src="/dummyLogo.png" alt="Application logo" />
+      <router-link to="/">
+        <img :class="$style.logo" src="/dummyLogo.png" alt="Application logo" />
+      </router-link>
     </div>
     <div :class="$style.navigationItems">
       <SidebarItem
@@ -43,6 +45,19 @@ import { sidebarItems } from './sidebarConfig'
   width: 98px;
   height: 98px;
   flex-shrink: 0;
+}
+
+/* Remove default focus outline on the anchor wrapping the logo while keeping accessibility in mind */
+.logoContainer :global(a),
+.logoContainer :global(a:focus),
+.logoContainer :global(a:focus-visible) {
+  outline: none;
+  box-shadow: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.logoContainer :global(a) > img {
+  display: block;
 }
 
 .navigationItems {

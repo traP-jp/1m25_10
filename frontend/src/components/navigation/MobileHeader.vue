@@ -1,7 +1,9 @@
 <template>
   <header :class="$style.header">
     <div :class="$style.logoContainer">
-      <img :class="$style.logo" src="/dummyLogo.png" alt="Application logo" />
+      <router-link to="/">
+        <img :class="$style.logo" src="/dummyLogo.png" alt="Application logo" />
+      </router-link>
     </div>
     <div :class="$style.userProfileContainer">
       <div :class="$style.userProfileMobile">
@@ -40,6 +42,19 @@ import UserProfile from '../sidebar/UserProfile.vue'
 .logo {
   width: 40px;
   height: 40px;
+}
+
+/* Remove default focus outline on the anchor wrapping the logo while keeping accessibility in mind */
+.logoContainer :global(a),
+.logoContainer :global(a:focus),
+.logoContainer :global(a:focus-visible) {
+  outline: none;
+  box-shadow: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.logoContainer :global(a) > img {
+  display: block; /* avoid extra inline spacing */
 }
 
 .userProfileContainer {
