@@ -3,6 +3,10 @@ import { env } from '@/config/env'
 import { useUserStore } from '@/stores/userStore'
 import HomeView from '@/views/HomeView.vue'
 
+// Constants for waiting logic (waiting for user.me fetch completion)
+const MAX_ME_FETCH_ATTEMPTS = 20
+const ME_FETCH_INTERVAL_MS = 50
+
 const routes = [
   {
     path: '/',
@@ -102,8 +106,8 @@ router.beforeEach(async (to) => {
     if (user.loading) {
       // 読み込み完了を短い間待つ（最大~1秒）
       const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
-      for (let i = 0; i < 20 && user.loading; i++) {
-        await sleep(50)
+      for (let i = 0; i < MAX_ME_FETCH_ATTEMPTS && user.loading; i++) {
+        await sleep(ME_FETCH_INTERVAL_MS)
       }
     }
     if (user.me === null) {
