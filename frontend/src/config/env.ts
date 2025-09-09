@@ -1,5 +1,6 @@
 // 環境変数の集中管理
 // 優先順位はViteの仕様に従い、OSで定義された VITE_* が .env.* より優先される
+import { ALBUM_CHANCE_STAMP_ID } from './constants'
 
 const rawApiBaseUrl = import.meta.env.VITE_API_BASE_URL as string | undefined
 const rawMockEnabled = import.meta.env.VITE_MOCK_ENABLED as string | undefined
@@ -107,5 +108,8 @@ export function generateImageUrl(imageId: string, config?: Partial<ImageUrlConfi
 // アルバムチャンス関連ヘルパー
 export function getAlbumChanceStampId(): string | undefined {
   const v = env.VITE_ALBUM_CHANCE_STAMP_ID?.trim()
-  return v && v.length > 0 ? v : undefined
+  if (v && v.length > 0) return v
+  // 環境変数未設定時のフォールバック
+  const fallback = ALBUM_CHANCE_STAMP_ID?.trim()
+  return fallback && fallback.length > 0 ? fallback : undefined
 }
