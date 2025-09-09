@@ -18,9 +18,9 @@ export const useImageStore = defineStore('image', {
     currentOffset: 0,
     currentSearchQuery: undefined as string | undefined,
     pageSize: 20,
-  albumChance: env.VITE_ALBUM_CHANCE_DEFAULT === true, // アルバムチャンス既定値（env）
-  scanOffset: 0, // アルバムチャンス時のスキャン用オフセット
-  totalHits: undefined as number | undefined, // traQのtotalHits（参考）
+    albumChance: env.VITE_ALBUM_CHANCE_DEFAULT === true, // アルバムチャンス既定値（env）
+    scanOffset: 0, // アルバムチャンス時のスキャン用オフセット
+    totalHits: undefined as number | undefined, // traQのtotalHits（参考）
   }),
 
   getters: {

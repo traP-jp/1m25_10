@@ -15,7 +15,7 @@ export class ImageService {
     searchQuery?: string,
     limit?: number,
     offset?: number,
-    options?: { albumChance?: boolean }
+    options?: { albumChance?: boolean },
   ): Promise<{ images: Image[]; totalHits?: number }> {
     const queryParams: GetImagesParams = {}
 
@@ -36,11 +36,11 @@ export class ImageService {
       if (sid) queryParams.stampId = sid
     }
 
-  const response = await apiClient.get<GetImagesResponse>(
+    const response = await apiClient.get<GetImagesResponse>(
       '/images',
       queryParams as Record<string, unknown>,
     )
-  return ImageService.mapResponse(response)
+    return ImageService.mapResponse(response)
   }
 
   // 特定の画像詳細取得（GET /images/{id}）

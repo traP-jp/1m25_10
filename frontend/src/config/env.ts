@@ -10,7 +10,6 @@ const rawAlbumChanceStampId = import.meta.env.VITE_ALBUM_CHANCE_STAMP_ID as stri
 const rawAlbumChanceDefault = import.meta.env.VITE_ALBUM_CHANCE_DEFAULT as string | undefined
 const rawRequireLogin = import.meta.env.VITE_REQUIRE_LOGIN as string | undefined
 
-
 function toBoolean(v: string | undefined): boolean | undefined {
   if (v == null) return undefined
   const s = String(v).trim().toLowerCase()
