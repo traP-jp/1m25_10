@@ -51,7 +51,7 @@ func (h *Handler) AuthRequest(c echo.Context) error {
 	setTempCookie(c, cookieVerifierKey, codeVerifier, 10*time.Minute)
 
 	cb := c.QueryParam("callback")
-	if cb != "" && strings.HasPrefix(cb, "/") {
+	if isValidRedirectPath(cb) {
 		setTempCookie(c, cookieCallbackKey, cb, 15*time.Minute)
 	}
 
@@ -101,10 +101,7 @@ func (h *Handler) AuthCallback(c echo.Context) error {
 
 	// callbackへリダイレクト
 	cb := "/"
-	if cbCookie, err := c.Cookie(cookieCallbackKey); err == nil &&
-		cbCookie.Value != "" &&
-		cbCookie.Value[0] == '/' &&
-		(len(cbCookie.Value) == 1 || (cbCookie.Value[1] != '/' && cbCookie.Value[1] != '\\')) {
+	if cbCookie, err := c.Cookie(cookieCallbackKey); err == nil && isValidRedirectPath(cbCookie.Value) {
 		cb = cbCookie.Value
 	}
 	delCookie(c, cookieCallbackKey)
@@ -214,6 +211,43 @@ func getTokenFromCookie(c echo.Context) string {
 		return ck.Value
 	}
 	return ""
+}
+
+// isValidRedirectPath validates that the callback is a safe, site-internal path.
+// Requirements:
+// - starts with a single '/'
+// - second char is not '/' or '\\' (avoid scheme-relative //example.com and UNC-like /\host)
+// - contains no backslash anywhere
+// - contains no control characters
+// - parsed URL must not be absolute and must not have host/scheme
+func isValidRedirectPath(cb string) bool {
+	if cb == "" {
+		return false
+	}
+	if cb[0] != '/' {
+		return false
+	}
+	if len(cb) > 1 {
+		if cb[1] == '/' || cb[1] == '\\' {
+			return false
+		}
+	}
+	if strings.Contains(cb, "\\") {
+		return false
+	}
+	for _, r := range cb {
+		if r < 0x20 || r == 0x7f { // control chars
+			return false
+		}
+	}
+	if u, err := url.Parse(cb); err != nil {
+		return false
+	} else {
+		if u.IsAbs() || u.Host != "" || u.Scheme != "" {
+			return false
+		}
+	}
+	return true
 }
 
 // ------------- HTTP calls to traQ -------------
