@@ -6,6 +6,9 @@ export const useUserStore = defineStore('user', {
     me: null as Me | null,
     loading: false as boolean,
   }),
+  getters: {
+    isAuthenticated: (state) => state.me !== null,
+  },
   actions: {
     async fetchMe() {
       this.loading = true

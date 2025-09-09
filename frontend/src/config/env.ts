@@ -8,6 +8,8 @@ const rawImageFormat = import.meta.env.VITE_IMAGE_FORMAT as string | undefined
 const rawImageSize = import.meta.env.VITE_IMAGE_SIZE as string | undefined
 const rawAlbumChanceStampId = import.meta.env.VITE_ALBUM_CHANCE_STAMP_ID as string | undefined
 const rawAlbumChanceDefault = import.meta.env.VITE_ALBUM_CHANCE_DEFAULT as string | undefined
+const rawRequireLogin = import.meta.env.VITE_REQUIRE_LOGIN as string | undefined
+
 
 function toBoolean(v: string | undefined): boolean | undefined {
   if (v == null) return undefined
@@ -30,6 +32,7 @@ export const env = {
   VITE_IMAGE_SIZE: rawImageSize,
   VITE_ALBUM_CHANCE_STAMP_ID: rawAlbumChanceStampId,
   VITE_ALBUM_CHANCE_DEFAULT: toBoolean(rawAlbumChanceDefault),
+  VITE_REQUIRE_LOGIN: toBoolean(rawRequireLogin) ?? false,
 }
 
 // APIのベースURL決定（優先度）
