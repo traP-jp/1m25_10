@@ -44,13 +44,19 @@ import UserProfile from '../sidebar/UserProfile.vue'
   height: 40px;
 }
 
-/* Remove default focus outline on the anchor wrapping the logo while keeping accessibility in mind */
-.logoContainer :global(a),
-.logoContainer :global(a:focus),
-.logoContainer :global(a:focus-visible) {
+/*
+  Remove tap highlight color.
+  Remove focus outline for mouse users, but keep it for keyboard users for accessibility.
+*/
+.logoContainer :global(a) {
+  -webkit-tap-highlight-color: transparent;
   outline: none;
   box-shadow: none;
-  -webkit-tap-highlight-color: transparent;
+}
+
+.logoContainer :global(a:focus-visible) {
+  outline: revert; /* Restore outline for keyboard navigation */
+  box-shadow: revert;
 }
 
 .logoContainer :global(a) > img {
