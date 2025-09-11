@@ -7,7 +7,9 @@ import { sidebarItems } from './sidebarConfig'
 <template>
   <div :class="$style.sidebar">
     <div :class="$style.logoContainer">
-      <img :class="$style.logo" src="/dummyLogo.png" alt="Application logo" />
+      <router-link to="/">
+        <img :class="$style.logo" src="/dummyLogo.png" alt="Application logo" />
+      </router-link>
     </div>
     <div :class="$style.navigationItems">
       <SidebarItem
@@ -43,6 +45,25 @@ import { sidebarItems } from './sidebarConfig'
   width: 98px;
   height: 98px;
   flex-shrink: 0;
+}
+
+/*
+  Remove tap highlight color.
+  Remove focus outline for mouse users, but keep it for keyboard users for accessibility.
+*/
+.logoContainer :global(a) {
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+  box-shadow: none;
+}
+
+.logoContainer :global(a:focus-visible) {
+  outline: revert; /* Restore outline for keyboard navigation */
+  box-shadow: revert;
+}
+
+.logoContainer :global(a) > img {
+  display: block;
 }
 
 .navigationItems {

@@ -38,6 +38,17 @@ const isActive = computed(() => route.path === props.path)
   text-decoration: none;
 }
 
+/*
+  Remove focus outline for mouse users, but keep it for keyboard users for accessibility.
+*/
+.sidebarItem:focus {
+  outline: none;
+}
+.sidebarItem:focus-visible {
+  outline: 2px solid #005bac;
+  outline-offset: 2px;
+}
+
 .iconSlot {
   width: 40px;
   height: 40px;

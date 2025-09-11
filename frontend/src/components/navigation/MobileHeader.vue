@@ -1,7 +1,9 @@
 <template>
   <header :class="$style.header">
     <div :class="$style.logoContainer">
-      <img :class="$style.logo" src="/dummyLogo.png" alt="Application logo" />
+      <router-link to="/">
+        <img :class="$style.logo" src="/dummyLogo.png" alt="Application logo" />
+      </router-link>
     </div>
     <div :class="$style.userProfileContainer">
       <div :class="$style.userProfileMobile">
@@ -40,6 +42,25 @@ import UserProfile from '../sidebar/UserProfile.vue'
 .logo {
   width: 40px;
   height: 40px;
+}
+
+/*
+  Remove tap highlight color.
+  Remove focus outline for mouse users, but keep it for keyboard users for accessibility.
+*/
+.logoContainer :global(a) {
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+  box-shadow: none;
+}
+
+.logoContainer :global(a:focus-visible) {
+  outline: revert; /* Restore outline for keyboard navigation */
+  box-shadow: revert;
+}
+
+.logoContainer :global(a) > img {
+  display: block; /* avoid extra inline spacing */
 }
 
 .userProfileContainer {
