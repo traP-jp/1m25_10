@@ -29,7 +29,7 @@ src/
 └── stores/         # Pinia ストア（状態管理のみ）
     ├── albumStore.ts   # アルバム状態管理
     ├── userStore.ts    # ユーザー状態管理
-    ├── imageStore.ts   # 画像状態管理
+    └── imageStore.ts   # 画像状態管理
 ```
 
 ## OpenAPI仕様対応
