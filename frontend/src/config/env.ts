@@ -1,11 +1,14 @@
 // 環境変数の集中管理
 // 優先順位はViteの仕様に従い、OSで定義された VITE_* が .env.* より優先される
+import { ALBUM_CHANCE_STAMP_ID } from './constants'
 
 const rawApiBaseUrl = import.meta.env.VITE_API_BASE_URL as string | undefined
 const rawMockEnabled = import.meta.env.VITE_MOCK_ENABLED as string | undefined
 const rawImageBaseUrl = import.meta.env.VITE_IMAGE_BASE_URL as string | undefined
 const rawImageFormat = import.meta.env.VITE_IMAGE_FORMAT as string | undefined
 const rawImageSize = import.meta.env.VITE_IMAGE_SIZE as string | undefined
+const rawAlbumChanceStampId = import.meta.env.VITE_ALBUM_CHANCE_STAMP_ID as string | undefined
+const rawAlbumChanceDefault = import.meta.env.VITE_ALBUM_CHANCE_DEFAULT as string | undefined
 const rawRequireLogin = import.meta.env.VITE_REQUIRE_LOGIN as string | undefined
 
 function toBoolean(v: string | undefined): boolean | undefined {
@@ -27,6 +30,8 @@ export const env = {
   VITE_IMAGE_BASE_URL: rawImageBaseUrl,
   VITE_IMAGE_FORMAT: rawImageFormat,
   VITE_IMAGE_SIZE: rawImageSize,
+  VITE_ALBUM_CHANCE_STAMP_ID: rawAlbumChanceStampId,
+  VITE_ALBUM_CHANCE_DEFAULT: toBoolean(rawAlbumChanceDefault),
   VITE_REQUIRE_LOGIN: toBoolean(rawRequireLogin) ?? false,
 }
 
@@ -98,4 +103,13 @@ export function generateImageUrl(imageId: string, config?: Partial<ImageUrlConfi
     const formatSuffix = finalConfig.format ? `.${finalConfig.format}` : ''
     return `${finalConfig.baseUrl}/seed/${imageId}/${finalConfig.size}${formatSuffix}`
   }
+}
+
+// アルバムチャンス関連ヘルパー
+export function getAlbumChanceStampId(): string | undefined {
+  const v = env.VITE_ALBUM_CHANCE_STAMP_ID?.trim()
+  if (v && v.length > 0) return v
+  // 環境変数未設定時のフォールバック
+  const fallback = ALBUM_CHANCE_STAMP_ID?.trim()
+  return fallback && fallback.length > 0 ? fallback : undefined
 }
