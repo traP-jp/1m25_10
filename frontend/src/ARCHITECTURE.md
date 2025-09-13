@@ -30,7 +30,6 @@ src/
     ├── albumStore.ts   # アルバム状態管理
     ├── userStore.ts    # ユーザー状態管理
     ├── imageStore.ts   # 画像状態管理
-    └── counter.ts      # カウンター（サンプル）
 ```
 
 ## OpenAPI仕様対応
