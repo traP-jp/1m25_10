@@ -14,11 +14,6 @@ const routes = [
     component: HomeView,
   },
   {
-    path: '/about',
-    name: 'about',
-    component: () => import('../views/AboutView.vue'),
-  },
-  {
     path: '/albums',
     name: 'albumList',
     // this generates a separate chunk (Albums.[hash].js) for this route
