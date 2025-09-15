@@ -48,7 +48,7 @@ jobs:
           if [ -z "$CURRENT_BODY" ]; then
             UPDATED_BODY="$CLOSES_TEXT"
           else
-            UPDATED_BODY="$(printf '%s\n\n%s' "$CURRENT_BODY" "$CLOSES_TEXT")"
+            UPDATED_BODY="$(printf '%s\n\n---\n%s' "$CURRENT_BODY" "$CLOSES_TEXT")"
           fi
 
           echo "Updating PR #${PR_NUMBER} body."
