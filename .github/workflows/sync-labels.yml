@@ -12,6 +12,7 @@ on:
   workflow_dispatch:
 jobs:
   label-sync:
+    if: github.repository == 'traP-jp/1m25_10'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
