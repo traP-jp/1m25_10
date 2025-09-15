@@ -2,14 +2,13 @@ name: PR Automation
 
 on:
   pull_request:
-    types: [opened, ready_for_review]
+    types: [opened]
 
 permissions:
   pull-requests: write
 
 jobs:
   add-issue-reference:
-    if: github.event.pull_request.draft == false
     timeout-minutes: 3
     runs-on: ubuntu-latest
     steps:
