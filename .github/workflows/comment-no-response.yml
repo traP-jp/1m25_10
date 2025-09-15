@@ -14,7 +14,7 @@ jobs:
     timeout-minutes: 3
     steps:
       - name: Comment out `_No response_` sections
-        uses: actions/github-script@v6
+        uses: actions/github-script@v8
         env:
           MIN_HEADING_LEVEL: '3'
           TARGET_HEADING_PATTERN: '^(Implementation Plan|Acceptance Criteria|Expected Behavior|Actual Behavior|Tasks|References|Reason|Suggested Fix)$'
