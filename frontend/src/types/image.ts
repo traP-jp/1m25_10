@@ -18,6 +18,7 @@ export interface ImageDetail {
 // GET /images のレスポンス型
 export interface GetImagesResponse {
   hits: string[] // UUID[]
+  totalHits?: number // バックエンドの traQ totalHits を転送（任意）
 }
 
 // 画像検索用のクエリパラメータ
@@ -25,4 +26,5 @@ export interface GetImagesParams {
   word?: string // 検索キーワード
   limit?: number // 取得件数 (デフォルト: 20)
   offset?: number // オフセット (デフォルト: 0)
+  stampId?: string // スタンプフィルタ（アルバムチャンス用）
 }
