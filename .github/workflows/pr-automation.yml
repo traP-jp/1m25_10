@@ -2,14 +2,14 @@ name: PR Automation
 
 on:
   pull_request:
-    types: [opened, ready_for_review]
+    types: [opened]
 
 permissions:
   pull-requests: write
 
 jobs:
   add-issue-reference:
-    if: github.repository == 'traP-jp/1m25_10' && github.event.pull_request.draft == false
+    if: github.repository == 'traP-jp/1m25_10'
     timeout-minutes: 3
     runs-on: ubuntu-latest
     steps:
@@ -49,7 +49,7 @@ jobs:
           if [ -z "$CURRENT_BODY" ]; then
             UPDATED_BODY="$CLOSES_TEXT"
           else
-            UPDATED_BODY="$(printf '%s\n\n%s' "$CURRENT_BODY" "$CLOSES_TEXT")"
+            UPDATED_BODY="$(printf '%s\n\n---\n%s' "$CURRENT_BODY" "$CLOSES_TEXT")"
           fi
 
           echo "Updating PR #${PR_NUMBER} body."
