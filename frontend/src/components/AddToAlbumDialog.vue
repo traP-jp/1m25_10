@@ -79,7 +79,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineEmits, defineProps, watch } from 'vue'
+import { ref, watch } from 'vue'
 import type { AlbumItem } from '@/types'
 import { albumService } from '@/services'
 
