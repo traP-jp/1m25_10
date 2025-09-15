@@ -9,6 +9,7 @@ permissions:
 
 jobs:
   add-issue-reference:
+    if: github.repository == 'traP-jp/1m25_10'
     timeout-minutes: 3
     runs-on: ubuntu-latest
     steps:
@@ -56,6 +57,7 @@ jobs:
 
   auto-assignment:
     if: >-
+      github.repository == 'traP-jp/1m25_10' &&
       github.event.action == 'opened' &&
       endsWith(github.actor, '[bot]') == false
     timeout-minutes: 3

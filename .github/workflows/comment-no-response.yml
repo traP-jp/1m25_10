@@ -9,6 +9,7 @@ permissions:
 
 jobs:
   comment-no-response:
+    if: github.repository == 'traP-jp/1m25_10'
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
