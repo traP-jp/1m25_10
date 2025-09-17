@@ -138,7 +138,6 @@ func (r *sqlRepositoryImpl) GetAlbums(ctx context.Context, filter domain.AlbumFi
 		return nil, fmt.Errorf("error during rows iteration: %w", err)
 	}
 
-
 	albumImageMap := make(map[uuid.UUID][]uuid.UUID, len(albumIDs))
 
 	for _, link := range links {
