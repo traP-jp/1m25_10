@@ -14,6 +14,9 @@ export interface AlbumItem {
   id: string // UUID
   title: string
   creator: string // UUID
+  images?: string[] // 画像UUIDの配列
+  created_at?: string // ISO 8601 format
+  updated_at?: string // ISO 8601 format
 }
 
 export interface CreateAlbumRequest {

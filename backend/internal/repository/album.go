@@ -40,11 +40,13 @@ type dbAlbumItem struct {
 	Id      uuid.UUID `db:"id"`
 	Title   string    `db:"title"`
 	Creator string    `db:"creator"`
+	CreatedAt time.Time `db:"created_at"`
+	UpdatedAt time.Time `db:"updated_at"`
 }
 
 // GetAlbums retrieves albums based on the provided filter.
 func (r *sqlRepositoryImpl) GetAlbums(ctx context.Context, filter domain.AlbumFilter) ([]domain.AlbumItem, error) {
-	query := `SELECT id, title, creator FROM albums WHERE 1=1`
+	query := `SELECT id, title, creator, created_at, updated_at FROM albums WHERE 1=1`
 	args := []interface{}{}
 
 	if filter.CreatorID != nil {
@@ -82,14 +84,82 @@ func (r *sqlRepositoryImpl) GetAlbums(ctx context.Context, filter domain.AlbumFi
 
 	query = r.db.Rebind(query)
 
+	// 画像以外を取得
 	var dbItems []dbAlbumItem
 	if err := r.db.SelectContext(ctx, &dbItems, query, args...); err != nil {
 		return nil, fmt.Errorf("failed to select album items: %w", err)
 	}
+	// アイテムが存在しない場合は空のスライスを返す
+	if len(dbItems) == 0 {
+		return []domain.AlbumItem{}, nil
+	}
 
-	items := make([]domain.AlbumItem, len(dbItems))
-	for i, d := range dbItems {
-		items[i] = domain.AlbumItem(d)
+	albumIDs := make([]uuid.UUID, len(dbItems))
+	for i, item := range dbItems {
+		albumIDs[i] = item.Id
+	}
+
+	placeholders := make([]string, len(albumIDs))
+	for i := range albumIDs {
+		placeholders[i] = "?"
+	}
+	query = fmt.Sprintf(`
+		SELECT album_id, image_id FROM album_images WHERE album_id IN (%s)`,
+		strings.Join(placeholders, ","),
+	)
+
+	args = make([]interface{}, len(albumIDs))
+	for i, id := range albumIDs {
+		args[i] = id
+	}
+
+	type albumImageLink struct {
+		AlbumID uuid.UUID `db:"album_id"`
+		ImageID uuid.UUID `db:"image_id"`
+	}
+
+	rows, err := r.db.QueryxContext(ctx, r.db.Rebind(query), args...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query album images: %w", err)
+	}
+	defer rows.Close()
+
+	links := []albumImageLink{}
+
+	for rows.Next() {
+		var link albumImageLink
+		if err := rows.Scan(&link.AlbumID, &link.ImageID); err != nil {
+			return nil, fmt.Errorf("failed to scan album image link: %w", err)
+		}
+		links = append(links, link)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error during rows iteration: %w", err)
+	}
+
+
+	albumImageMap := make(map[uuid.UUID][]uuid.UUID, len(albumIDs))
+
+	for _, link := range links {
+		albumImageMap[link.AlbumID] = append(albumImageMap[link.AlbumID], link.ImageID)
+	}
+
+	items := make([]domain.AlbumItem, 0, len(dbItems))
+	for _, dbItem := range dbItems {
+		imageIDs, found := albumImageMap[dbItem.Id]
+		if !found {
+			imageIDs = []uuid.UUID{}
+		}
+
+		items = append(items, domain.AlbumItem{
+			Id:        dbItem.Id,
+			Title:     dbItem.Title,
+			Creator:   dbItem.Creator,
+			Images:    imageIDs,
+			CreatedAt: dbItem.CreatedAt,
+			UpdatedAt: dbItem.UpdatedAt,
+		})
 	}
 
 	return items, nil
