@@ -164,7 +164,7 @@ func (h *Handler) DeleteAlbum(c echo.Context) error {
 	return c.NoContent(http.StatusNoContent)
 }
 
-// PUT /api/v1/albums/:id
+// PATCH /api/v1/albums/:id (PUT remains supported for backward compatibility)
 func (h *Handler) UpdateAlbum(c echo.Context) error {
 	albumID, err := uuid.Parse(c.Param("id"))
 	if err != nil {

@@ -31,9 +31,9 @@ export class AlbumService {
     return apiClient.post<Album>('/albums', albumData)
   }
 
-  // アルバム更新（PUT /albums/{id}）
+  // アルバム部分更新（PATCH /albums/{id}）
   async updateAlbum(albumId: string, albumData: UpdateAlbumRequest): Promise<Album> {
-    return apiClient.put<Album>(`/albums/${albumId}`, albumData)
+    return apiClient.patch<Album>(`/albums/${albumId}`, albumData)
   }
 
   async addImagesToAlbum(albumId: string, imageIds: string[]): Promise<Album> {
