@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jmoiron/sqlx"
 	"github.com/traP-jp/1m25_10/backend/internal/domain"
 )
 
@@ -37,9 +38,9 @@ type dbAlbum struct {
 }
 
 type dbAlbumItem struct {
-	Id      uuid.UUID `db:"id"`
-	Title   string    `db:"title"`
-	Creator string    `db:"creator"`
+	Id        uuid.UUID `db:"id"`
+	Title     string    `db:"title"`
+	Creator   string    `db:"creator"`
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`
 }
@@ -99,47 +100,24 @@ func (r *sqlRepositoryImpl) GetAlbums(ctx context.Context, filter domain.AlbumFi
 		albumIDs[i] = item.Id
 	}
 
-	placeholders := make([]string, len(albumIDs))
-	for i := range albumIDs {
-		placeholders[i] = "?"
-	}
-	query = fmt.Sprintf(`
-		SELECT album_id, image_id FROM album_images WHERE album_id IN (%s)`,
-		strings.Join(placeholders, ","),
-	)
-
-	args = make([]interface{}, len(albumIDs))
-	for i, id := range albumIDs {
-		args[i] = id
-	}
-
 	type albumImageLink struct {
 		AlbumID uuid.UUID `db:"album_id"`
 		ImageID uuid.UUID `db:"image_id"`
 	}
 
-	rows, err := r.db.QueryxContext(ctx, r.db.Rebind(query), args...)
+	query = `SELECT album_id, image_id FROM album_images WHERE album_id IN (?);`
+	query, args, err := sqlx.In(query, albumIDs)
 	if err != nil {
-		return nil, fmt.Errorf("failed to query album images: %w", err)
+		return nil, fmt.Errorf("failed to build query with sqlx.In: %w", err)
 	}
-	defer rows.Close()
+	query = r.db.Rebind(query)
 
-	links := []albumImageLink{}
-
-	for rows.Next() {
-		var link albumImageLink
-		if err := rows.Scan(&link.AlbumID, &link.ImageID); err != nil {
-			return nil, fmt.Errorf("failed to scan album image link: %w", err)
-		}
-		links = append(links, link)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("error during rows iteration: %w", err)
+	var links []albumImageLink
+	if err := r.db.SelectContext(ctx, &links, query, args...); err != nil {
+		return nil, fmt.Errorf("failed to fetch album image links: %w", err)
 	}
 
 	albumImageMap := make(map[uuid.UUID][]uuid.UUID, len(albumIDs))
-
 	for _, link := range links {
 		albumImageMap[link.AlbumID] = append(albumImageMap[link.AlbumID], link.ImageID)
 	}
