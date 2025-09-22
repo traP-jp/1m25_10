@@ -19,10 +19,7 @@ function isSafeInternalPath(p: string | null | undefined): p is string {
   if (p[0] !== '/') return false
   if (p.length > 1 && (p[1] === '/' || p[1] === '\\')) return false
   if (p.includes('\\')) return false
-  for (let i = 0; i < p.length; i++) {
-    const code = p.charCodeAt(i)
-    if (code < 0x20 || code === 0x7f) return false
-  }
+  if (/[\x00-\x1f\x7f]/.test(p)) return false
   try {
     const u = new URL(p, window.location.origin)
     if (u.origin !== window.location.origin) return false
