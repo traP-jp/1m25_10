@@ -40,6 +40,7 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import ImageCard from '@/components/ImageCard.vue'
 import type { Image } from '@/types'
 
@@ -70,8 +71,6 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const emit = defineEmits<Emits>()
-
-import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 
 const loadMoreRef = ref<HTMLElement | null>(null)
 let observer: IntersectionObserver | null = null
