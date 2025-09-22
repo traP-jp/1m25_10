@@ -428,8 +428,54 @@ paths:
         '500':
           $ref: '#/components/responses/ServerError'
     put:
-      summary: アルバムを更新
-      description: 提供された情報で既存のアルバムを更新します
+      summary: アルバムを更新（非推奨）
+      description: 提供された情報で既存のアルバムを更新します。今後は PATCH を使用してください。
+      operationId: updateAlbumUsingPut
+      deprecated: true
+      tags:
+        - Albums
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: アルバムのUUID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAlbumRequest'
+      responses:
+        '200':
+          description: アルバムが正常に更新されました
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Album'
+        '400':
+          description: 無効なリクエスト
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: 権限がありません
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    patch:
+      summary: アルバムを部分更新
+      description: 提供されたフィールドのみを部分更新します
       operationId: updateAlbum
       tags:
         - Albums
@@ -647,6 +693,25 @@ components:
           format: uuid
           description: アルバム作成者のUUID
           example: "550e8400-e29b-41d4-a716-446655440002"
+        images:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: アルバム内の画像UUIDの配列
+          example: 
+            - "550e8400-e29b-41d4-a716-446655440003"
+            - "550e8400-e29b-41d4-a716-446655440004"
+        created_at:
+          type: string
+          format: date-time
+          description: 作成タイムスタンプ
+          example: "2024-07-01T00:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          description: 最終更新タイムスタンプ
+          example: "2024-08-15T10:30:00Z"
 
     CreateAlbumRequest:
       type: object
