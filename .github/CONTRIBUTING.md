@@ -76,7 +76,7 @@ issue を進める上で必要なアクションを示します。
   - docker(/backend): `area: infra`
   - github-actions(/): `area: infra`
 - 補足: Dependabot のコミットメッセージ接頭辞は `chore` です。
-- グルーピング: npm と GitHub Actions は依存更新をグループ化する設定です([dependabot.yml](dependabot.yml) 参照)。
+- グルーピング: npm と GitHub Actions は依存更新をグループ化する設定です([dependabot.yml](./dependabot.yml) 参照)。
 
 ## コミット
 
