@@ -44,6 +44,9 @@ import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import ImageCard from '@/components/ImageCard.vue'
 import type { Image } from '@/types'
 
+// Infinite scroll margin/threshold in pixels
+const INFINITE_SCROLL_MARGIN_PX = 400
+
 interface Props {
   images: Image[]
   loading?: boolean
@@ -99,7 +102,7 @@ const setupObserver = () => {
     },
     {
       root: null,
-      rootMargin: '400px 0px',
+      rootMargin: `${INFINITE_SCROLL_MARGIN_PX}px 0px`,
       threshold: 0,
     },
   )
@@ -109,7 +112,7 @@ const setupObserver = () => {
   }
 }
 
-const isInViewport = (el: HTMLElement, rootMarginPx = 400) => {
+const isInViewport = (el: HTMLElement, rootMarginPx = INFINITE_SCROLL_MARGIN_PX) => {
   const rect = el.getBoundingClientRect()
   const viewH = window.innerHeight || document.documentElement.clientHeight
   return rect.top <= viewH + rootMarginPx
@@ -119,7 +122,9 @@ const maybeAutoLoad = () => {
   if (!props.hasMore || props.loading || props.loadingMore || props.error) return
   const el = loadMoreRef.value
   const doc = document.scrollingElement || document.documentElement
-  const fitsViewport = doc ? doc.scrollHeight <= window.innerHeight + 400 : false
+  const fitsViewport = doc
+    ? doc.scrollHeight <= window.innerHeight + INFINITE_SCROLL_MARGIN_PX
+    : false
   if ((el && isInViewport(el)) || fitsViewport) {
     emit('loadMore')
   }
