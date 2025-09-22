@@ -22,6 +22,7 @@
       <div
         v-if="hasMore"
         :class="[$style.loadMoreCard, { [$style.loading]: loadingMore }]"
+        ref="loadMoreRef"
         @click="$emit('loadMore')"
       >
         <div :class="$style.loadMoreContent">
@@ -68,7 +69,82 @@ const props = withDefaults(defineProps<Props>(), {
   loadingMore: false,
 })
 
-defineEmits<Emits>()
+const emit = defineEmits<Emits>()
+
+import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
+
+const loadMoreRef = ref<HTMLElement | null>(null)
+let observer: IntersectionObserver | null = null
+
+const setupObserver = () => {
+  if (observer) {
+    observer.disconnect()
+    observer = null
+  }
+
+  if (!props.hasMore) return
+
+  observer = new IntersectionObserver(
+    (entries) => {
+      const entry = entries[0]
+      if (
+        entry &&
+        entry.isIntersecting &&
+        props.hasMore &&
+        !props.loadingMore &&
+        !props.loading &&
+        !props.error
+      ) {
+        emit('loadMore')
+      }
+    },
+    {
+      root: null,
+      rootMargin: '400px 0px',
+      threshold: 0,
+    },
+  )
+
+  if (loadMoreRef.value) {
+    observer.observe(loadMoreRef.value)
+  }
+}
+
+const isInViewport = (el: HTMLElement, rootMarginPx = 400) => {
+  const rect = el.getBoundingClientRect()
+  const viewH = window.innerHeight || document.documentElement.clientHeight
+  return rect.top <= viewH + rootMarginPx
+}
+
+const maybeAutoLoad = () => {
+  if (!props.hasMore || props.loading || props.loadingMore || props.error) return
+  const el = loadMoreRef.value
+  const doc = document.scrollingElement || document.documentElement
+  const fitsViewport = doc ? doc.scrollHeight <= window.innerHeight + 400 : false
+  if ((el && isInViewport(el)) || fitsViewport) {
+    emit('loadMore')
+  }
+}
+
+onMounted(() => {
+  nextTick(() => {
+    setupObserver()
+    maybeAutoLoad()
+  })
+})
+
+onBeforeUnmount(() => {
+  if (observer) observer.disconnect()
+})
+
+watch(
+  () => [props.hasMore, props.loadingMore, props.loading, props.error],
+  () => {
+    // 状態変化に応じて監視を張り直す
+    setupObserver()
+    nextTick(() => maybeAutoLoad())
+  },
+)
 
 // 画像が選択されているかチェック
 const isImageSelected = (imageId: string): boolean => {
