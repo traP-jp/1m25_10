@@ -54,7 +54,7 @@ onMounted(async () => {
 
   // 未ログイン: OAuth フロー開始。callback は /login ではなく next にする
   state.value = 'redirecting-login'
-  window.location.href = `/api/auth/request?callback=${encodeURIComponent(getNextPath())}`
+  window.location.href = `/api/auth/request?callback=${encodeURIComponent(next)}`
 })
 </script>
 
