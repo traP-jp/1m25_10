@@ -693,6 +693,25 @@ components:
           format: uuid
           description: アルバム作成者のUUID
           example: "550e8400-e29b-41d4-a716-446655440002"
+        images:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: アルバム内の画像UUIDの配列
+          example: 
+            - "550e8400-e29b-41d4-a716-446655440003"
+            - "550e8400-e29b-41d4-a716-446655440004"
+        created_at:
+          type: string
+          format: date-time
+          description: 作成タイムスタンプ
+          example: "2024-07-01T00:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          description: 最終更新タイムスタンプ
+          example: "2024-08-15T10:30:00Z"
 
     CreateAlbumRequest:
       type: object
