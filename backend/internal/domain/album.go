@@ -22,6 +22,9 @@ type AlbumItem struct {
 	Id      uuid.UUID `json:"id"`
 	Title   string    `json:"title"`
 	Creator string    `json:"creator"`
+	Images      []uuid.UUID `json:"images"`
+	CreatedAt   time.Time   `json:"created_at"`
+	UpdatedAt   time.Time   `json:"updated_at"`
 }
 
 // AlbumFilter represents filtering criteria for albums
