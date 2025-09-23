@@ -22,7 +22,6 @@
       <div
         v-if="hasMore"
         :class="[$style.loadMoreCard, { [$style.loading]: loadingMore }]"
-        ref="loadMoreRef"
         @click="$emit('loadMore')"
       >
         <div :class="$style.loadMoreContent">
@@ -36,6 +35,8 @@
       <p v-if="hasSearchQuery">検索条件に一致する画像がありません</p>
       <p v-else>まだ画像がありません</p>
     </div>
+    <!-- Always-present sentinel for IntersectionObserver -->
+    <div ref="sentinelRef" :class="$style.sentinel" aria-hidden="true"></div>
   </div>
 </template>
 
@@ -75,8 +76,21 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<Emits>()
 
-const loadMoreRef = ref<HTMLElement | null>(null)
+const sentinelRef = ref<HTMLElement | null>(null)
 let observer: IntersectionObserver | null = null
+
+const RESIZE_DEBOUNCE_MS = 120
+
+const resizeTimer = ref<number | undefined>(undefined)
+
+const onResize = () => {
+  if (resizeTimer.value !== undefined) {
+    window.clearTimeout(resizeTimer.value)
+  }
+  resizeTimer.value = window.setTimeout(() => {
+    maybeAutoLoad()
+  }, RESIZE_DEBOUNCE_MS)
+}
 
 const setupObserver = () => {
   if (observer) {
@@ -107,8 +121,8 @@ const setupObserver = () => {
     },
   )
 
-  if (loadMoreRef.value) {
-    observer.observe(loadMoreRef.value)
+  if (sentinelRef.value) {
+    observer.observe(sentinelRef.value)
   }
 }
 
@@ -120,7 +134,7 @@ const isInViewport = (el: HTMLElement, rootMarginPx = INFINITE_SCROLL_MARGIN_PX)
 
 const maybeAutoLoad = () => {
   if (!props.hasMore || props.loading || props.loadingMore || props.error) return
-  const el = loadMoreRef.value
+  const el = sentinelRef.value
   const doc = document.scrollingElement || document.documentElement
   const fitsViewport = doc
     ? doc.scrollHeight <= window.innerHeight + INFINITE_SCROLL_MARGIN_PX
@@ -135,14 +149,20 @@ onMounted(() => {
     setupObserver()
     maybeAutoLoad()
   })
+  window.addEventListener('resize', onResize)
 })
 
 onBeforeUnmount(() => {
   if (observer) observer.disconnect()
+  window.removeEventListener('resize', onResize)
+  if (resizeTimer.value !== undefined) {
+    window.clearTimeout(resizeTimer.value)
+    resizeTimer.value = undefined
+  }
 })
 
 watch(
-  () => [props.hasMore, props.loadingMore, props.loading, props.error],
+  () => [props.hasMore, props.loadingMore, props.loading, props.error, props.images.length],
   () => {
     // 状態変化に応じて監視を張り直す
     setupObserver()
@@ -254,6 +274,11 @@ const isImageSelected = (imageId: string): boolean => {
   color: #666;
   font-size: 1rem;
   font-weight: 500;
+}
+
+.sentinel {
+  width: 100%;
+  height: 1px;
 }
 
 // レスポンシブデザイン
