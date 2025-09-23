@@ -125,9 +125,15 @@ function formatDate(iso: string): string {
 const formattedContent = computed(() => {
   if (!message.value) return ''
   let text = message.value.content || ''
-  const url = props.imageId ? `https://q.trap.jp/files/${props.imageId}` : ''
-  if (url) text = text.split(url).join('')
-  text = text.replace(/\n+$/g, '')
+  // traQ の投稿内では画像は単に `https://q.trap.jp/files/<uuid>` の形式で書かれるだけ。
+  // そのため本文からファイル URL を取り除く。
+  // まず URL のみが書かれた行を丸ごと削除し、次にインラインの URL を削除する。
+  const fileUrlLineRegex = /^\s*https:\/\/q\.trap\.jp\/files\/[A-Za-z0-9\-_.~%]+\s*$/gim
+  const fileUrlInlineRegex = /https:\/\/q\.trap\.jp\/files\/[A-Za-z0-9\-_.~%]+/g
+  text = text.replace(fileUrlLineRegex, '')
+  text = text.replace(fileUrlInlineRegex, '')
+  // 末尾の改行/空白を削除（画像 URL を取り除いたあとに末尾だけトリムする）
+  text = text.replace(/\s+$/g, '')
   return text.replace(/\n/g, '<br>')
 })
 
