@@ -40,6 +40,6 @@ updates:
     pull-request-branch-name:
       separator: "-"
     groups:
-      github-actions-dependencies:
+      dependencies:
         patterns:
           - "*"
