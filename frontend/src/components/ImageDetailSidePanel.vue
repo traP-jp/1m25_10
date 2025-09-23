@@ -1,45 +1,56 @@
 <template>
-  <aside :class="['side-panel', { open: visible }]">
-    <header class="header">
-      <h3>投稿の詳細</h3>
-      <button class="close" @click="$emit('close')">×</button>
-    </header>
-    <div class="body">
-      <div v-if="!imageId" class="placeholder">画像をクリックすると投稿詳細が表示されます</div>
-      <div v-else>
-        <div v-if="loading" class="loading">読み込み中...</div>
-        <div v-else-if="error" class="error">{{ error }}</div>
-        <div v-else-if="message" class="content">
-          <div class="author">
-            <div class="avatar">
-              <img
-                v-if="authorIconUrl && !authorIconError"
-                :src="authorIconUrl"
-                :alt="authorDisplayName || authorName || 'author'"
-                class="avatarImg"
-                @error="authorIconError = true"
-                @load="authorIconError = false"
-              />
-              <span v-else class="avatarText">{{ authorInitials }}</span>
+  <div class="side-panel-wrapper" :class="{ open: visible }">
+    <div v-if="isMobile" class="backdrop" :class="{ show: visible }" @click="$emit('close')" />
+    <aside
+      ref="panelRef"
+      :class="['side-panel', { open: visible }]"
+      :role="isMobile ? 'dialog' : undefined"
+      :aria-modal="isMobile ? 'true' : undefined"
+      tabindex="-1"
+      @keydown.esc.stop.prevent="$emit('close')"
+    >
+      <header class="header">
+        <h3>投稿の詳細</h3>
+        <button class="close" @click="$emit('close')">×</button>
+      </header>
+      <div class="body">
+        <div v-if="!imageId" class="placeholder">画像をクリックすると投稿詳細が表示されます</div>
+        <div v-else>
+          <div v-if="loading" class="loading">読み込み中...</div>
+          <div v-else-if="error" class="error">{{ error }}</div>
+          <div v-else-if="message" class="content">
+            <div class="author">
+              <div class="avatar">
+                <img
+                  v-if="authorIconUrl && !authorIconError"
+                  :src="authorIconUrl"
+                  :alt="authorDisplayName || authorName || 'author'"
+                  class="avatarImg"
+                  @error="authorIconError = true"
+                  @load="authorIconError = false"
+                />
+                <span v-else class="avatarText">{{ authorInitials }}</span>
+              </div>
+              <div class="info">
+                <div class="name">{{ authorDisplayName || authorName || message.userId }}</div>
+                <div class="date">{{ formatDate(message.createdAt) }}</div>
+              </div>
             </div>
-            <div class="info">
-              <div class="name">{{ authorDisplayName || authorName || message.userId }}</div>
-              <div class="date">{{ formatDate(message.createdAt) }}</div>
+            <div class="text" v-if="formattedContent" v-html="formattedContent"></div>
+            <div class="channel">#{{ message.channelId }}</div>
+            <div class="actions">
+              <a :href="traqLink" target="_blank" rel="noopener" class="link">traQで開く</a>
             </div>
-          </div>
-          <div class="text" v-if="formattedContent" v-html="formattedContent"></div>
-          <div class="channel">#{{ message.channelId }}</div>
-          <div class="actions">
-            <a :href="traqLink" target="_blank" rel="noopener" class="link">traQで開く</a>
           </div>
         </div>
       </div>
-    </div>
-  </aside>
+    </aside>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { useWindowSize } from '@/composables/useWindowSize'
 
 interface Props {
   visible: boolean
@@ -63,6 +74,10 @@ const message = ref<Message | null>(null)
 const authorName = ref<string>('')
 const authorDisplayName = ref<string>('')
 const authorIconError = ref<boolean>(false)
+const panelRef = ref<HTMLElement | null>(null)
+
+const { width } = useWindowSize()
+const isMobile = computed(() => (width?.value ?? 1024) <= 768)
 
 watch(
   () => [props.visible, props.imageId] as const,
@@ -71,6 +86,31 @@ watch(
     await fetchDetail(id)
   },
 )
+
+watch(
+  () => props.visible,
+  async (vis) => {
+    if (isMobile.value) {
+      document.body.style.overflow = vis ? 'hidden' : ''
+    }
+    if (vis) {
+      await nextTick()
+      panelRef.value?.focus()
+    }
+  },
+  { immediate: true },
+)
+
+onMounted(() => {
+  if (props.visible && isMobile.value) {
+    document.body.style.overflow = 'hidden'
+  }
+})
+
+onBeforeUnmount(() => {
+  // 念のため解除
+  document.body.style.overflow = ''
+})
 
 async function fetchDetail(id: string) {
   loading.value = true
@@ -154,6 +194,9 @@ const authorInitials = computed(() => {
 </script>
 
 <style scoped>
+.side-panel-wrapper {
+  position: relative;
+}
 .side-panel {
   /* in-flow side column by default */
   position: relative;
@@ -257,6 +300,19 @@ const authorInitials = computed(() => {
 
 /* Small screens: use overlay behavior to avoid pushing content vertically */
 @media (max-width: 768px) {
+  .backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(17, 24, 39, 0.45);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+    z-index: 890;
+  }
+  .backdrop.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
   .side-panel {
     position: fixed;
     top: 0;
