@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jmoiron/sqlx"
 	"github.com/traP-jp/1m25_10/backend/internal/domain"
 )
 
@@ -37,14 +38,16 @@ type dbAlbum struct {
 }
 
 type dbAlbumItem struct {
-	Id      uuid.UUID `db:"id"`
-	Title   string    `db:"title"`
-	Creator string    `db:"creator"`
+	Id        uuid.UUID `db:"id"`
+	Title     string    `db:"title"`
+	Creator   string    `db:"creator"`
+	CreatedAt time.Time `db:"created_at"`
+	UpdatedAt time.Time `db:"updated_at"`
 }
 
 // GetAlbums retrieves albums based on the provided filter.
 func (r *sqlRepositoryImpl) GetAlbums(ctx context.Context, filter domain.AlbumFilter) ([]domain.AlbumItem, error) {
-	query := `SELECT id, title, creator FROM albums WHERE 1=1`
+	query := `SELECT id, title, creator, created_at, updated_at FROM albums WHERE 1=1`
 	args := []interface{}{}
 
 	if filter.CreatorID != nil {
@@ -82,14 +85,58 @@ func (r *sqlRepositoryImpl) GetAlbums(ctx context.Context, filter domain.AlbumFi
 
 	query = r.db.Rebind(query)
 
+	// 画像以外を取得
 	var dbItems []dbAlbumItem
 	if err := r.db.SelectContext(ctx, &dbItems, query, args...); err != nil {
 		return nil, fmt.Errorf("failed to select album items: %w", err)
 	}
+	// アイテムが存在しない場合は空のスライスを返す
+	if len(dbItems) == 0 {
+		return []domain.AlbumItem{}, nil
+	}
 
-	items := make([]domain.AlbumItem, len(dbItems))
-	for i, d := range dbItems {
-		items[i] = domain.AlbumItem(d)
+	albumIDs := make([]uuid.UUID, len(dbItems))
+	for i, item := range dbItems {
+		albumIDs[i] = item.Id
+	}
+
+	type albumImageLink struct {
+		AlbumID uuid.UUID `db:"album_id"`
+		ImageID uuid.UUID `db:"image_id"`
+	}
+
+	query = `SELECT album_id, image_id FROM album_images WHERE album_id IN (?);`
+	query, args, err := sqlx.In(query, albumIDs)
+	if err != nil {
+		return nil, fmt.Errorf("failed to build query with sqlx.In: %w", err)
+	}
+	query = r.db.Rebind(query)
+
+	var links []albumImageLink
+	if err := r.db.SelectContext(ctx, &links, query, args...); err != nil {
+		return nil, fmt.Errorf("failed to fetch album image links: %w", err)
+	}
+
+	albumImageMap := make(map[uuid.UUID][]uuid.UUID, len(albumIDs))
+	for _, link := range links {
+		albumImageMap[link.AlbumID] = append(albumImageMap[link.AlbumID], link.ImageID)
+	}
+
+	items := make([]domain.AlbumItem, 0, len(dbItems))
+	for _, dbItem := range dbItems {
+		imageIDs, found := albumImageMap[dbItem.Id]
+		if !found {
+			imageIDs = []uuid.UUID{}
+		}
+
+		items = append(items, domain.AlbumItem{
+			Id:        dbItem.Id,
+			Title:     dbItem.Title,
+			Creator:   dbItem.Creator,
+			Images:    imageIDs,
+			CreatedAt: dbItem.CreatedAt,
+			UpdatedAt: dbItem.UpdatedAt,
+		})
 	}
 
 	return items, nil

@@ -6,6 +6,7 @@
   "engines": {
     "node": "^20.19.0 || >=22.12.0"
   },
+  "packageManager": "npm@10.8.2",
   "scripts": {
     "dev": "vite",
     "dev:mock": "run-p dev mock",
