@@ -8,14 +8,31 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 type State = 'checking' | 'redirecting-login' | 'redirecting-next'
 const state = ref<State>('checking')
+const router = useRouter()
+
+function isSafeInternalPath(p: string | null | undefined): p is string {
+  if (!p) return false
+  if (p[0] !== '/') return false
+  if (p.length > 1 && (p[1] === '/' || p[1] === '\\')) return false
+  if (p.includes('\\')) return false
+  if (/[\x00-\x1f\x7f]/.test(p)) return false
+  try {
+    const u = new URL(p, window.location.origin)
+    if (u.origin !== window.location.origin) return false
+  } catch {
+    return false
+  }
+  return true
+}
 
 function getNextPath(): string {
   const params = new URLSearchParams(window.location.search)
   const next = params.get('next')
-  return next && next.startsWith('/') ? next : '/'
+  return isSafeInternalPath(next) ? next : '/'
 }
 
 onMounted(async () => {
@@ -25,7 +42,7 @@ onMounted(async () => {
     if (resp.ok) {
       // 既にログイン済みなら next に進む
       state.value = 'redirecting-next'
-      window.location.replace(next)
+      await router.replace(next)
       return
     }
   } catch {
@@ -34,8 +51,7 @@ onMounted(async () => {
 
   // 未ログイン: OAuth フロー開始。callback は /login ではなく next にする
   state.value = 'redirecting-login'
-  const callback = next
-  window.location.href = `/api/auth/request?callback=${encodeURIComponent(callback)}`
+  window.location.href = `/api/auth/request?callback=${encodeURIComponent(next)}`
 })
 </script>
 
