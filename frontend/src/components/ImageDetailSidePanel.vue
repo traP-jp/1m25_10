@@ -131,7 +131,9 @@ const formattedContent = computed(() => {
   return text.replace(/\n/g, '<br>')
 })
 
-const traqLink = computed(() => (props.imageId ? `https://q.trap.jp/files/${props.imageId}` : '#'))
+const traqLink = computed(() =>
+  message.value && message.value.id ? `https://q.trap.jp/messages/${message.value.id}` : '#',
+)
 
 const authorIconUrl = computed(() =>
   authorName.value
