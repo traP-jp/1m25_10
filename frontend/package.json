@@ -46,6 +46,6 @@
     "vue-tsc": "^3.0.7"
   },
   "overrides": {
-    "@types/node": "22"
+    "@types/node": "^22.16.5"
   }
 }
