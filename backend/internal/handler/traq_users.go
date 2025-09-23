@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -30,7 +31,11 @@ func (h *Handler) GetTraqUserByID(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadGateway, "failed to request traQ").SetInternal(err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if cerr := resp.Body.Close(); cerr != nil {
+			log.Printf("warn: failed to close response body: %v", cerr)
+		}
+	}()
 
 	return h.proxyResponse(c, resp)
 }
