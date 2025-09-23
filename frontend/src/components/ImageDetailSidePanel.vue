@@ -27,7 +27,7 @@
               <div class="date">{{ formatDate(message.createdAt) }}</div>
             </div>
           </div>
-          <div class="text" v-html="formattedContent"></div>
+          <div class="text" v-if="formattedContent" v-html="formattedContent"></div>
           <div class="channel">#{{ message.channelId }}</div>
           <div class="actions">
             <a :href="traqLink" target="_blank" rel="noopener" class="link">traQで開く</a>
