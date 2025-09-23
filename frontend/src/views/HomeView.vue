@@ -95,7 +95,11 @@
       @retry="retryLoad"
       @toggle-selection="imageStore.toggleImageSelection"
       @load-more="loadMoreImages"
+      @open-detail="openDetail"
     />
+
+    <!-- 画像詳細 右側パネル -->
+    <ImageDetailSidePanel :visible="detailVisible" :image-id="detailImageId" @close="closeDetail" />
   </div>
 </template>
 
@@ -106,6 +110,7 @@ import { albumService } from '@/services'
 import ImageList from '@/components/ImageList.vue'
 import CreateAlbumDialog from '@/components/CreateAlbumDialog.vue'
 import AddToAlbumDialog from '@/components/AddToAlbumDialog.vue'
+import ImageDetailSidePanel from '@/components/ImageDetailSidePanel.vue'
 
 const imageStore = useImageStore()
 
@@ -183,6 +188,18 @@ onMounted(() => {
 const onToggleAlbumChance = () => {
   imageStore.setAlbumChance(albumChance.value)
   imageStore.fetchImages(searchQuery.value.trim() || undefined)
+}
+
+// 画像詳細モーダルの制御
+const detailVisible = ref(false)
+const detailImageId = ref<string | null>(null)
+const openDetail = (imageId: string) => {
+  detailImageId.value = imageId
+  detailVisible.value = true
+}
+const closeDetail = () => {
+  detailVisible.value = false
+  detailImageId.value = null
 }
 </script>
 <style lang="scss" module>
