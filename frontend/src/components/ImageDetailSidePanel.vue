@@ -147,22 +147,18 @@ const authorInitials = computed(() => {
 
 <style scoped>
 .side-panel {
-  position: fixed;
-  top: 0;
-  right: 0;
-  width: min(420px, 92vw);
-  height: 100vh;
+  /* in-flow side column by default */
+  position: relative;
+  width: 100%;
+  height: auto;
   background: #fff;
   border-left: 1px solid #e5e7eb;
-  box-shadow: -8px 0 24px rgba(0, 0, 0, 0.08);
-  transform: translateX(100%);
-  transition: transform 0.25s ease;
+  box-shadow: none;
+  transform: none;
+  transition: none;
   display: flex;
   flex-direction: column;
-  z-index: 900;
-}
-.side-panel.open {
-  transform: translateX(0);
+  z-index: 1;
 }
 .header {
   display: flex;
@@ -180,7 +176,7 @@ const authorInitials = computed(() => {
 .body {
   padding: 12px;
   overflow: auto;
-  height: calc(100vh - 54px);
+  max-height: calc(100vh - 54px);
 }
 .placeholder {
   color: #777;
@@ -249,5 +245,26 @@ const authorInitials = computed(() => {
 }
 .link:hover {
   text-decoration: underline;
+}
+
+/* Small screens: use overlay behavior to avoid pushing content vertically */
+@media (max-width: 768px) {
+  .side-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: min(420px, 92vw);
+    height: 100vh;
+    box-shadow: -8px 0 24px rgba(0, 0, 0, 0.08);
+    transform: translateX(100%);
+    transition: transform 0.25s ease;
+    z-index: 900;
+  }
+  .side-panel.open {
+    transform: translateX(0);
+  }
+  .body {
+    height: calc(100vh - 54px);
+  }
 }
 </style>
