@@ -62,3 +62,17 @@
 - name: "need: expert help"
   color: "00C4B3"
   description: "有識者や先輩の助けが必要"
+- name: "need: info"
+  color: "2196F3"
+  description: "追加情報が必要"
+
+# Status: 課題の状態
+- name: "status: blocked"
+  color: "E11D21"
+  description: "外部要因や依存関係により進行不可"
+- name: "status: invalid"
+  color: "CFD3D7"
+  description: "誤報、再現できない、仕様通りなど無効と判断されるケース"
+- name: "status: stale"
+  color: "A8A8A8"
+  description: "長期間更新がなく停滞している"
