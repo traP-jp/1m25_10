@@ -1,6 +1,6 @@
 module github.com/traP-jp/1m25_10/backend
 
-go 1.24.2
+go 1.25
 
 require (
 	github.com/go-sql-driver/mysql v1.9.3
