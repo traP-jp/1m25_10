@@ -73,7 +73,7 @@ jobs:
 
           ISSUE_LABELS_LINES=$(echo "$ISSUE_LABELS" | tr ',' '\n')
 
-          FILTERED_LABELS=$(echo "$ISSUE_LABELS_LINES" | { grep -E "$TARGET_LABEL_PATTERN" || true; })
+          FILTERED_LABELS=$(echo "$ISSUE_LABELS_LINES" | grep -E "$TARGET_LABEL_PATTERN" || true)
 
           TARGET_LABELS=$(echo "$FILTERED_LABELS" | tr '\n' ',' | sed 's/,$//')
 
