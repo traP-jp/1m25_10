@@ -71,7 +71,12 @@ jobs:
             exit 0
           fi
 
-          TARGET_LABELS=$(echo "$ISSUE_LABELS" | tr ',' '\n' | { grep -E "$TARGET_LABEL_PATTERN" || true; } | tr '\n' ',' | sed 's/,$//')
+          # Split labels into lines
+          ISSUE_LABELS_LINES=$(echo "$ISSUE_LABELS" | tr ',' '\n')
+          # Filter labels matching the target pattern
+          FILTERED_LABELS=$(echo "$ISSUE_LABELS_LINES" | { grep -E "$TARGET_LABEL_PATTERN" || true; })
+          # Join filtered labels back into a comma-separated string
+          TARGET_LABELS=$(echo "$FILTERED_LABELS" | tr '\n' ',' | sed 's/,$//')
 
           if [ -z "$TARGET_LABELS" ]; then
             echo "No target labels (matching '${TARGET_LABEL_PATTERN}') found on issue #${ISSUE_NUMBER}. Skipping."
