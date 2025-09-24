@@ -62,7 +62,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           ISSUE_NUMBER: ${{ steps.extract_issue.outputs.issue_number }}
-          TARGET_LABEL_PATTERN: "^(?:type|area|priority):[[:space:]]*"
+          TARGET_LABEL_PATTERN: "^(?:type|area|priority):"
         run: |
           ISSUE_LABELS=$(gh issue view "$ISSUE_NUMBER" --json labels --jq '[.labels[].name] | join(",")')
 
