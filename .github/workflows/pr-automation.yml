@@ -6,9 +6,10 @@ on:
 
 permissions:
   pull-requests: write
+  issues: read
 
 jobs:
-  add-issue-reference:
+  setup-pr:
     if: github.repository == 'traP-jp/1m25_10'
     timeout-minutes: 3
     runs-on: ubuntu-latest
@@ -38,12 +39,12 @@ jobs:
           REPO: ${{ github.repository }}
         run: |
           CURRENT_BODY=$(gh pr view "$PR_NUMBER" --json body --jq .body)
-          
+
           if [[ "$CURRENT_BODY" == *"#${ISSUE_NUMBER}"* ]]; then
             echo "PR body already contains '#${ISSUE_NUMBER}'. No update needed."
             exit 0
           fi
-          
+
           CLOSES_TEXT="Closes #${ISSUE_NUMBER}"
 
           if [ -z "$CURRENT_BODY" ]; then
@@ -55,15 +56,36 @@ jobs:
           echo "Updating PR #${PR_NUMBER} body."
           gh pr edit "$PR_NUMBER" --body "$UPDATED_BODY"
 
-  auto-assignment:
-    if: >-
-      github.repository == 'traP-jp/1m25_10' &&
-      github.event.action == 'opened' &&
-      endsWith(github.actor, '[bot]') == false
-    timeout-minutes: 3
-    runs-on: ubuntu-latest
-    steps:
+      - name: Add labels from issue
+        if: steps.extract_issue.outputs.issue_number
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          ISSUE_NUMBER: ${{ steps.extract_issue.outputs.issue_number }}
+          TARGET_LABEL_PATTERN: "^(type|area|priority):"
+        run: |
+          ISSUE_LABELS=$(gh issue view "$ISSUE_NUMBER" --json labels --jq '[.labels[].name] | join(",")')
+
+          if [ -z "$ISSUE_LABELS" ]; then
+            echo "No labels found on issue #${ISSUE_NUMBER}. Skipping."
+            exit 0
+          fi  
+
+          ISSUE_LABELS_LINES=$(echo "$ISSUE_LABELS" | tr ',' '\n')
+
+          FILTERED_LABELS=$(echo "$ISSUE_LABELS_LINES" | grep -E "$TARGET_LABEL_PATTERN" || true)
+
+          TARGET_LABELS=$(echo "$FILTERED_LABELS" | tr '\n' ',' | sed 's/,$//')
+
+          if [ -z "$TARGET_LABELS" ]; then
+            echo "No target labels (matching '${TARGET_LABEL_PATTERN}') found on issue #${ISSUE_NUMBER}. Skipping."
+          else
+            echo "Adding labels ($TARGET_LABELS) from issue #${ISSUE_NUMBER} to PR #${PR_NUMBER}."
+            gh pr edit "$PR_NUMBER" --add-label "$TARGET_LABELS"
+          fi
+
       - name: Add event actor to assignees
+        if: endsWith(github.actor, '[bot]') == false
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
