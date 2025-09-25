@@ -9,6 +9,7 @@ interface Props {
 
 interface Emits {
   toggleSelection: []
+  openDetail: []
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -23,6 +24,10 @@ const isSelected = computed(() => props.isSelected)
 const toggleSelection = () => {
   emit('toggleSelection')
 }
+
+const openDetail = () => {
+  emit('openDetail')
+}
 </script>
 
 <template>
@@ -31,6 +36,7 @@ const toggleSelection = () => {
     tabindex="0"
     @keydown.enter="toggleSelection"
     @keydown.space.prevent="toggleSelection"
+    @click="openDetail"
   >
     <img :src="props.url" :alt="props.alt" :class="$style.image" />
     <div :class="[$style.overlay, { [$style.selected]: isSelected }]">

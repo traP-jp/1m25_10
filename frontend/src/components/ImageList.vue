@@ -17,6 +17,7 @@
         alt=""
         :is-selected="isImageSelected(image.id)"
         @toggle-selection="() => $emit('toggleSelection', image.id)"
+        @open-detail="$emit('openDetail', image.id)"
       />
 
       <div
@@ -57,6 +58,7 @@ interface Emits {
   retry: []
   toggleSelection: [imageId: string]
   loadMore: []
+  openDetail: [imageId: string]
 }
 
 const props = withDefaults(defineProps<Props>(), {

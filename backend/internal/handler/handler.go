@@ -74,4 +74,6 @@ func (h *Handler) SetupTraqRoutes(traqGroup *echo.Group) {
 	}
 	// messages search endpoints
 	traqGroup.GET("/messages", h.GetTraqMessagesSearch)
+	// users endpoint proxy
+	traqGroup.GET("/users/:id", h.GetTraqUserByID)
 }

@@ -82,20 +82,34 @@
       @add-to-album="addToAlbum"
     />
 
-    <!-- 画像一覧 -->
-    <ImageList
-      :images="images"
-      :loading="imageStore.loading"
-      :error="imageStore.error"
-      :selected-image-ids="imageStore.selectedImageIds"
-      :has-search-query="!!searchQuery"
-      :has-more="imageStore.hasMore"
-      :loading-more="imageStore.loadingMore"
-      :get-image-url="imageStore.getImageUrl"
-      @retry="retryLoad"
-      @toggle-selection="imageStore.toggleImageSelection"
-      @load-more="loadMoreImages"
-    />
+    <div :class="[$style.layout, detailVisible ? $style.sideOpen : '']">
+      <!-- 画像一覧 -->
+      <div :class="$style.main">
+        <ImageList
+          :images="images"
+          :loading="imageStore.loading"
+          :error="imageStore.error"
+          :selected-image-ids="imageStore.selectedImageIds"
+          :has-search-query="!!searchQuery"
+          :has-more="imageStore.hasMore"
+          :loading-more="imageStore.loadingMore"
+          :get-image-url="imageStore.getImageUrl"
+          @retry="retryLoad"
+          @toggle-selection="imageStore.toggleImageSelection"
+          @load-more="loadMoreImages"
+          @open-detail="openDetail"
+        />
+      </div>
+
+      <!-- 画像詳細 右側パネル -->
+      <aside :class="$style.side">
+        <ImageDetailSidePanel
+          :visible="detailVisible"
+          :image-id="detailImageId"
+          @close="closeDetail"
+        />
+      </aside>
+    </div>
   </div>
 </template>
 
@@ -106,6 +120,7 @@ import { albumService } from '@/services'
 import ImageList from '@/components/ImageList.vue'
 import CreateAlbumDialog from '@/components/CreateAlbumDialog.vue'
 import AddToAlbumDialog from '@/components/AddToAlbumDialog.vue'
+import ImageDetailSidePanel from '@/components/ImageDetailSidePanel.vue'
 
 const imageStore = useImageStore()
 
@@ -184,6 +199,18 @@ const onToggleAlbumChance = () => {
   imageStore.setAlbumChance(albumChance.value)
   imageStore.fetchImages(searchQuery.value.trim() || undefined)
 }
+
+// 画像詳細モーダルの制御
+const detailVisible = ref(false)
+const detailImageId = ref<string | null>(null)
+const openDetail = (imageId: string) => {
+  detailImageId.value = imageId
+  detailVisible.value = true
+}
+const closeDetail = () => {
+  detailVisible.value = false
+  detailImageId.value = null
+}
 </script>
 <style lang="scss" module>
 .homeView {
@@ -193,12 +220,58 @@ const onToggleAlbumChance = () => {
   min-height: 100vh;
 }
 
+.layout {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  margin-top: 16px;
+}
+
+.main {
+  flex: 1 1 auto;
+  min-width: 0; /* allow children to shrink */
+}
+
+.side {
+  width: 0;
+  flex: 0 0 auto;
+  transition: width 0.25s ease;
+  overflow: hidden;
+  align-self: flex-start;
+}
+
+.sideOpen .side {
+  width: min(420px, 92vw);
+  position: sticky;
+  top: 24px; /* account for page padding */
+  height: calc(100vh - 48px);
+  overflow: auto;
+}
+
 .header {
+  display: block;
   margin-bottom: 32px;
 }
 
 .titleSection {
   margin-bottom: 20px;
+  min-width: 0;
+}
+
+.controls {
+  display: flex;
+  gap: 0;
+  align-items: center;
+  padding: 16px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  min-height: 64px;
+  transition: gap 0.3s ease;
+
+  &.hasSelection {
+    gap: 16px;
+  }
 }
 
 .switchLabel {
@@ -407,6 +480,16 @@ const onToggleAlbumChance = () => {
 @media (max-width: 768px) {
   .homeView {
     padding: 16px;
+  }
+
+  .layout {
+    flex-direction: column-reverse; /* show side below main on small screens */
+  }
+
+  .side {
+    position: static;
+    width: 100% !important;
+    height: auto !important;
   }
 
   .controls {
