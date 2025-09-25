@@ -11,6 +11,12 @@
 - name: "type: refactoring"
   color: "6f42c1"
   description: "コード品質を向上させる内部改善"
+- name: "type: chore"
+  color: "6a737d"
+  description: "依存関係を除く日常保守や設定の変更等の作業"
+- name: "type: dependencies"
+  color: "0366d6"
+  description: "Dependabot等による依存関係の更新"
 
 # Area: どの領域に関連するか
 - name: "area: frontend"
