@@ -10,8 +10,6 @@ body:
       description: "どの部分のコードをどのように改善したいか、簡潔な概要"
       placeholder: |
         ex. コンポーネントxの責務を分割して見通しを良くする
-    validations:
-      required: true
 
   - type: textarea
     id: reason
@@ -37,6 +35,14 @@ body:
       placeholder: |
         - [ ] タスク1
         - [ ] タスク2
+
+  - type: textarea
+    id: details
+    attributes:
+      label: "Details"
+      description: "その他補足情報"
+      placeholder: |
+        機能追加が予定されているため、その前にリファクタリングを行いたい
 
   - type: textarea
     id: references
