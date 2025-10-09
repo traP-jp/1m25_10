@@ -11,8 +11,6 @@ body:
       description: "目的や期待する成果をまとめた、簡潔な概要"
       placeholder: |
         ex. ユーザーが新しいダッシュボード機能を使えるようにする
-    validations:
-      required: true
 
   # - type: textarea
   #   id: reason
@@ -21,15 +19,6 @@ body:
   #     description: "なぜ、このEpicが必要なのか"
   #     placeholder: |
   #       ex. 既存のダッシュボードでは、ユーザーが必要な情報を一覧できず、UXを損なっているため。
-
-  - type: textarea
-    id: acceptance-criteria
-    attributes:
-      label: "Acceptance Criteria"
-      description: "何をもってこのEpicが完了したと判断するか"
-      placeholder: |
-        - [ ] 新しいダッシュボード機能が、全てのテストを通過して本番環境にデプロイされている
-        - [ ] ユーザーマニュアルが更新されている
 
   # - type: textarea
   #   id: in-scope
@@ -64,6 +53,14 @@ body:
 
         - #125 APIの設計
         - #126 データベースのマイグレーション
+
+  - type: textarea
+    id: details
+    attributes:
+      label: "Details"
+      description: "その他補足情報"
+      placeholder: |
+        データ取得コストが増える可能性があるため注意が必要
 
   - type: textarea
     id: references

@@ -11,17 +11,6 @@ body:
       description: "どのような機能改善をしたいか、簡潔な概要"
       placeholder: |
         ex. ユーザーがCSVでデータをエクスポートできる機能の実装
-    validations:
-      required: true
-
-  - type: textarea
-    id: acceptance-criteria
-    attributes:
-      label: "Acceptance Criteria"
-      description: "完了の基準"
-      placeholder: |
-        - [ ] 画面にCSVダウンロードボタンが表示される
-        - [ ] ダウンロードしたCSVにA, B, Cの列が含まれている
 
   - type: textarea
     id: dev-tasks
@@ -31,6 +20,16 @@ body:
       placeholder: |
         - [ ] タスク1
         - [ ] タスク2
+
+  - type: textarea
+    id: details
+    attributes:
+      label: "Details"
+      description: "補足したい背景・検討内容・設計メモなど"
+      placeholder: |
+        機能追加の選択肢として、以下も考えられる
+          - B案
+          - C案
 
   - type: textarea
     id: references
